@@ -7,4 +7,7 @@ From certain ``.ipynb`` files.
    :glob:
    :maxdepth: 1
 
-   my_example
+   1_graph_frame_creation
+   2_indicators
+   3_criteria
+   4_road_adder
