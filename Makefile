@@ -1,4 +1,4 @@
-SOURCE_DIR = my_package
+SOURCE_DIR = transport_frames
 TEST_DIR = tests
 
 # code formatting and linting

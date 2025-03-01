@@ -18,6 +18,11 @@ htmlcov/
 .coverage
 .cache
 .pytest_cache/
+examples/cache/
+cache
+bd_data/
+dataa/
+.DS_Store
 
 # Django stuff
 *.log
@@ -36,7 +41,7 @@ instance/
 .venv/
 venv/
 ENV/
-
+test_venv/
 # MyPy
 .mypy_cache/
 

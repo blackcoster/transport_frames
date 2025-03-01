@@ -1,18 +1,16 @@
-import geopandas as gpd
-import networkx as nx
-import osmnx as ox
-from loguru import logger
-from shapely import Polygon, MultiPolygon
-from shapely.geometry import LineString
-import momepy
-import pandas as pd
-import numpy as np
-from transport_frames.models.schema import BaseSchema
-from transport_frames.utils.helper_funcs import buffer_and_transform_polygon, convert_geometry_from_wkt
 import warnings
-import iduedu
-warnings.simplefilter("ignore", UserWarning)
 
+import geopandas as gpd
+import iduedu
+import momepy
+import networkx as nx
+from shapely import MultiPolygon, Polygon
+from shapely.geometry import LineString
+
+from transport_frames.utils.helper_funcs import BaseSchema, convert_geometry_from_wkt
+
+
+warnings.simplefilter("ignore", UserWarning)
 
 
 class PolygonSchema(BaseSchema):
@@ -22,30 +20,34 @@ class PolygonSchema(BaseSchema):
     Attributes:
     - _geom_types (list): List of allowed geometry types (Polygon, MultiPolygon).
     """
-    
-    _geom_types = [Polygon, MultiPolygon]
-    
-class Graph():
-    def __init__(self, polygon: gpd.GeoDataFrame, local_crs: int = 3857):
-        self.polygon = PolygonSchema(polygon.to_crs(local_crs))
-        graph = from_polygon_iduedu(self.polygon,local_crs)
-        self.graph = _crop_edges_by_polygon(graph,self.polygon)
-        self.graph.graph['approach'] = 'primal'
-        self.graph.graph['crs'] = local_crs
-        self.graph = classify_nodes(self.graph)
 
-def from_polygon_iduedu(polygon:gpd.GeoDataFrame,local_crs: int, buffer=3000):
-    polygon_with_buf = gpd.GeoDataFrame([{'geometry': polygon.loc[0].geometry.buffer(buffer)}], crs=local_crs)
+    _geom_types = [Polygon, MultiPolygon]
+
+
+def get_graph_from_polygon(polygon: gpd.GeoDataFrame, local_crs: int):
+    polygon = PolygonSchema(polygon.to_crs(local_crs))
+    graph = from_polygon_iduedu(polygon, local_crs)
+    graph = _crop_edges_by_polygon(graph, polygon)
+    graph.graph["approach"] = "primal"
+    graph.graph["crs"] = local_crs
+    graph = classify_nodes(graph)
+    return graph
+
+
+def from_polygon_iduedu(polygon: gpd.GeoDataFrame, local_crs: int, buffer=3000):
+    polygon_with_buf = gpd.GeoDataFrame([{"geometry": polygon.loc[0].geometry.buffer(buffer)}], crs=local_crs)
     polygon_geometry_with_buf = polygon_with_buf.to_crs(4326).geometry.unary_union
-    graph = iduedu.get_drive_graph(polygon = polygon_geometry_with_buf, additional_edgedata=['highway', 'maxspeed', 'reg', 'ref', 'name'])
+    graph = iduedu.get_drive_graph(
+        polygon=polygon_geometry_with_buf, additional_edgedata=["highway", "maxspeed", "reg", "ref", "name"]
+    )
 
     return graph
+
 
 def classify_nodes(graph):
     """
     Classify nodes in the graph based on their edges reg status.
     """
-
 
     for node in graph.nodes:
         graph.nodes[node]["reg_1"] = False
@@ -74,12 +76,10 @@ def _crop_edges_by_polygon(graph: nx.MultiDiGraph, polygon: Polygon):
     gpd.GeoDataFrame: Updated edges with geometries trimmed to the city boundary.
     """
 
-    nodes,edges = momepy.nx_to_gdf(graph)
+    nodes, edges = momepy.nx_to_gdf(graph)
 
     city_transformed = polygon.to_crs(edges.crs)
-    edges["intersections"] = edges["geometry"].intersection(
-        city_transformed.unary_union
-    )
+    edges["intersections"] = edges["geometry"].intersection(city_transformed.unary_union)
     edges["geometry"] = edges["intersections"]
 
     edges.drop(columns=["intersections"], inplace=True)
@@ -103,7 +103,7 @@ def _crop_edges_by_polygon(graph: nx.MultiDiGraph, polygon: Polygon):
                 "y": row["geometry"].coords[-1][1],
             }
 
-    graph = _create_graph(edges,nodes_coord)
+    graph = _create_graph(edges, nodes_coord)
     nx.set_node_attributes(graph, nodes_coord)
     graph = nx.convert_node_labels_to_integers(graph)
     graph = convert_geometry_from_wkt(graph)
@@ -135,6 +135,7 @@ def _rewrite_nodes_after_cropping(edges, nodes_coord):
                 "y": row["geometry"].coords[-1][1],
             }
     return nodes_coord
+
 
 def _create_graph(edges, nodes_coord):
     """
@@ -168,12 +169,11 @@ def _create_graph(edges, nodes_coord):
             p1,
             p2,
             length_meter=length,
-            time_min = edge.time_min,
-            maxspeed = edge.maxspeed,
+            time_min=edge.time_min,
+            maxspeed=edge.maxspeed,
             geometry=str(geom),
             highway=edge.highway,
             ref=edge.ref,
-            reg = edge.reg,
-
+            reg=edge.reg,
         )
     return G

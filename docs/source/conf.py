@@ -20,12 +20,12 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 
 # -- Project information -----------------------------------------------------
 
-project = "MyPackage"
+project = "transport_frames"
 copyright = "2024-{}, IDU".format(datetime.datetime.now().year)
 author = "IDU"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.1" # needs to be changed from time to time
+release = "2.0.1" # needs to be changed from time to time
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be

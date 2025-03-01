@@ -3,10 +3,10 @@ requires = ["setuptools>=64.0"]
 build-backend = "setuptools.build_meta"
 
 [project] # метаданные проекта
-name = "my_package" # название вашего проекта
-version = "0.0.1"
+name = "transport_frames" # название вашего проекта
+version = "2.0.1"
 authors = [
-    { name = "Vasilii Starikov", email = "vasilstar97@gmail.com" },
+    { name = "Polina Krupenina", email = "krupenina.p@mail.ru" },
 ] # не забудьте поменять на свое имя :)
 description = "IDU research package boilerplate"
 readme = "README.rst"
@@ -14,7 +14,18 @@ requires-python = ">=3.10"
 license = { file = "LICENCE" }
 
 dependencies = [ # здесь необходимо вести все устанавливаемые зависимости: пакеты, которые необходимы для адекватной работы вашей библиотеки
-    "geopandas>=1.0.0,<2.0.0",
+    "geopandas>=0.12,<0.15",
+    "osmnx==1.9.4",
+    "networkx>=3.2",
+    "contextily==1.6.2",
+    "folium==0.14.0",
+    "momepy==0.9.1",
+    "mapclassify==2.6.1",
+    "pyogrio==0.10.0",
+    "pandas>=2.1",
+    "pyarrow==19.0.0",
+    "pandera==0.22.1",
+    "iduedu==0.2.2"
 ]
 
 classifiers = [ # метаданные для описания проекта пользователям, например, на PyPI: какая лицензия, какое предназначение
@@ -25,7 +36,7 @@ classifiers = [ # метаданные для описания проекта п
 ]
 
 [tool.setuptools.packages.find] # что включать в сборку при установке
-include = ["my_package*"]
+include = ["transport_frames*"]
 
 
 [project.optional-dependencies]
@@ -50,7 +61,7 @@ test = [ # зависимости, необходимые для тестиро�
 ]
 
 docs = [ # зависимости, необходимые для сборки документации
-    "docutils>=0.18.0,<1.0.0",
+    "docutils>=0.18.1,<0.20",
     "sphinx==6.2.1",
     "sphinx-book-theme==1.0.1",
     "nbsphinx==0.9.3",
@@ -60,12 +71,13 @@ docs = [ # зависимости, необходимые для сборки д
     "myst_parser>=3.0.0,<4.0.0",
     "sphinx_rtd_theme>=1.2.0,<2.0.0",
     "pandoc>=2.0.0,<3.0.0",
+    "readme_renderer<44.0",
 ]
 
 
 [project.urls]
-"Repository" = "https://github.com/vasilstar97/python-package-boilerplate"
-"Bug Tracker" = "https://github.com/vasilstar97/python-package-boilerplate/issues"
+"Repository" = "https://github.com/blackcoster/transport_frames"
+"Bug Tracker" = "https://github.com/blackcoster/transport_frames/issues"
 
 # всякие истории, связанные с форматированием кода
 [tool.black]
