@@ -57,7 +57,7 @@ The library calculates various transport indicators at different **administrativ
 - **Service accessibility**  (bus routes, railway coverage, and general service accessibility)
 - **Number of services**  (number of services inside or near a given territory)
 - **Number of bus routes**  (number of bus routes intersecting the territory)
-- **Distance to nature objects **  (water objects, nature reserves, etc.)
+- **Distance to nature objects**  (water objects, nature reserves, etc.)
 
 .. features-end
 
@@ -79,39 +79,7 @@ How to use
 
 .. use-start
 
-Use the library by importing classes from ``blocksnet``:
-
-::
-
-   from blocksnet import City
-
-Next, use the necessary classes and modules:
-
-::
-
-   city = City(
-      blocks=blocks_gdf,
-      acc_mx=acc_mx,
-   )
-   city.plot()
-
-.. use-end
-
-For more detailed use case see our `examples <#examples>`__.
-
-Data
-----
-
-Before running the examples, one can use the data from `tests
-section <#tests/data>`__
-and place it in the ``examples/data`` directory. You can use your own
-data, but it must follow the structure described in the
-`API documentation <https://aimclub.github.io/blocksnet/>`__.
-
-Examples
---------
-
-Next examples will help to get used to the library:
+For the detailed tutorial on usage case see our `examples <#examples>`__.
 
 The following **Jupyter Notebooks** illustrate core library functions:
 
@@ -133,6 +101,17 @@ The following **Jupyter Notebooks** illustrate core library functions:
 4. **Road Graph Updates** → `4_road_adder.ipynb <examples/4_road_adder.ipynb>`_
    - Updates transport graphs with new roads and edges.
    - Analyzes connectivity improvement after graph modifications.
+
+.. use-end
+
+Data
+----
+
+Before running the examples, one can use the data from `tests
+section <#tests/data>`__
+and place it in the ``examples/data`` directory. You can use your own
+data, but it must follow the structure described in the
+`API documentation <https://aimclub.github.io/blocksnet/>`__.
 
 Documentation
 -------------
@@ -219,7 +198,7 @@ To start developing the library, one must perform following actions:
    `documentation <https://github.com/blackcoster/transport_frames/tree/main/docs>`__
    and **README** according to your changes.
 
-11. When you're done editing and local testing, run:
+9.  When you're done editing and local testing, run:
 
    ::
 
