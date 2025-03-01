@@ -49,22 +49,15 @@ Features
 
 The library calculates various transport indicators at different **administrative levels** (region, district, etc.), including:
 
-- **Distance to regional admin center** 🏢
-- **Distance to federal roads** 🛣️
-- **Connectivity score** 🔄 (measuring how well a region is connected to the transport network)
-- **Total road length** 🚗
-- **Road density** 📏 (road length per area)
-- **Regional road classification** 🏛️ (road lengths categorized by importance)
-- **Service accessibility** 🚌 (bus routes, railway coverage, and general service accessibility)
-- **Service availability** 🏥 (number of services inside or near a given territory)
-
-🏙 **Territory-Based Analysis**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- Computes indicators for a **territory polygon with a buffer** (e.g., measuring accessibility within 3 km).
-- Evaluates **service accessibility** (bus stops, train stations, airports).
-- Determines **distance to nature reserves** and other geographic features.
-- Identifies **nearest district centers** and estimates travel times.
+- **Distance to regional centers** 
+- **Distance to federal roads** 
+- **Connectivity score**  (measuring how well a region is connected to the transport network)
+- **Lengths of roads and railway paths** 
+- **Road density**  (road length per area)
+- **Service accessibility**  (bus routes, railway coverage, and general service accessibility)
+- **Number of services**  (number of services inside or near a given territory)
+- **Number of bus routes**  (number of bus routes intersecting the territory)
+- **Distance to nature objects **  (water objects, nature reserves, etc.)
 
 .. features-end
 
@@ -269,7 +262,7 @@ You can contact us:
 
 -  `IDU <https://idu.itmo.ru/en/contacts/contacts.htm>`__ - Institute of
    Design and Urban Studies
--  `Polina Krupenina<https://t.me/ratyear>`__ - project manager
+-  `Polina Krupenina <https://t.me/ratyear>`__ - project manager
 -  `Alexander Morozov <https://t.me/insert_later>`__ - lead software engineer
 
 .. contacts-end
