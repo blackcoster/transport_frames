@@ -1,3 +1,5 @@
+""" Module for creating and weighting transport frame """
+
 import warnings
 
 import geopandas as gpd
@@ -22,19 +24,56 @@ from pandera.typing import Series
 
 
 class PointSchema(BaseSchema):
+    """
+    Schema for validating points.
+
+    Attributes
+    ----------
+    _geom_types : list
+        List of allowed geometry types for the points, default is [shapely.Point]
+    """
     _geom_types = [Point]
 
 
 class CentersSchema(BaseSchema):
+    """
+    Schema for validating central cities.
+
+    Attributes
+    ----------
+    _geom_types : list
+        List of allowed geometry types for the blocks, default is [shapely.Polygon]
+    """
     name: Series[str] = pa.Field(nullable=True)
     _geom_types = [Point]
 
 
-def get_frame(graph, admin_centers, area_polygon, region_polygons, country_polygon=ox.geocode_to_gdf("RUSSIA")):
-    # graph schema
-    # points schema (name, Point)
-    # other schemas
-    # ensure crs
+def get_frame(graph: nx.MultiDiGraph, 
+              admin_centers: gpd.GeoDataFrame, 
+              area_polygon: gpd.GeoDataFrame, 
+              region_polygons: gpd.GeoDataFrame, 
+              country_polygon: gpd.GeoDataFrame=ox.geocode_to_gdf("RUSSIA"))-> nx.MultiDiGraph:
+    """
+    Creates frame from graph. Edges are filtered based on reg [1,2].
+    Region point nodes are assigned with 'city_name' attribute.
+    Points, connecting the roads with other regions or countries are marked with 'exit' and 'exit_country'.
+
+    Parameters
+    ----------
+    graph: nx.MultiDiGraph
+        City network graph with classified roads and edges.
+    admin_centers : gpd.GeoDataFrame
+        Administrative region centers points to assign 'city_name' attribute
+    region_polygons : gpd.GeoDataFrame
+        Polygons or regions of the country to assign 'border_region' attribute to exits
+    country_polygon : gpd.GeoDataFrame
+        Polygon of the country to assign 'exit_country' attribute
+
+    Returns
+    -------
+    nx.MultiDiGraph
+        Frame of the graph with added 'city_node','exit','exit_country','border_region' attributes
+    """
 
     admin_centers = CentersSchema(admin_centers).to_crs(graph.graph["crs"]).copy()
     frame = _filter_roads(graph)
@@ -44,8 +83,20 @@ def get_frame(graph, admin_centers, area_polygon, region_polygons, country_polyg
     return frame
 
 
-def _filter_roads(graph):
-    """Filter the graph to include only reg_1 and reg_2 roads."""
+def _filter_roads(graph) -> nx.MultiDiGraph:
+    """
+    Filters the graph to include only reg_1 and reg_2 roads.
+    
+    Parameters
+    ----------
+    graph : nx.MultiDiGraph
+        graph with edges, containing 'reg' attribute
+    
+    Returns
+    -------
+    nx.MultiDiGraph
+        Frame of filtered edges with 'reg' in [1, 2] 
+    """
     edges_to_keep = [(u, v, k) for u, v, k, d in graph.edges(data=True, keys=True) if d.get("reg") in ([1, 2])]
     frame = graph.edge_subgraph(edges_to_keep).copy()
     for node, data in frame.nodes(data=True):
@@ -53,8 +104,24 @@ def _filter_roads(graph):
     return frame
 
 
-def _assign_city_names_to_nodes(points, frame, max_distance=3000):
-    """Assign city names to nodes in the graph based on proximity to city centers."""
+def _assign_city_names_to_nodes(points, frame, max_distance=3000)-> nx.MultiDiGraph:
+    """
+    Assigns city names to nodes in the graph based on proximity to city centers.
+    
+    Parameters
+    ----------
+    points : gpd.GeoDataFrame
+        Region centers points
+    frame : nx.MultiDiGraph
+        Frame of filtered edges with 'reg' in [1, 2] 
+    max_distance : int
+        Max distance (meters) on which a node can be assigned to a city
+
+    Returns
+    -------
+    nx.MultiDiGraph
+        A frame with nodes assigned with 'city_name' attribute
+    """
 
     points = points.to_crs(frame.graph["crs"])  # Ensure same CRS
     n, e = momepy.nx_to_gdf(frame)
@@ -83,20 +150,30 @@ def _assign_city_names_to_nodes(points, frame, max_distance=3000):
 
 
 def mark_exits(
-    frame, area_polygon: gpd.GeoDataFrame, regions_polygons: gpd.GeoDataFrame, country_polygon: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
+    frame: nx.MultiDiGraph, 
+    area_polygon: gpd.GeoDataFrame, 
+    regions_polygons: gpd.GeoDataFrame, 
+    country_polygon: gpd.GeoDataFrame
+) -> nx.MultiDiGraph:
     """
-    Assign the 'exit' attribute to nodes in a GeoDataFrame based on their intersection with city boundaries.
+    Assign the 'exit', 'exit_country' and 'boorder_region' attribute to nodes 
+    in a GeoDataFrame based on their intersection with city boundaries.
 
     Parameters:
-    - gdf_nodes (GeoDataFrame): GeoDataFrame containing the nodes.
-    - city_polygon (GeoDataFrame): GeoDataFrame of city polygons.
-    - regions (GeoDataFrame): GeoDataFrame of region polygons.
-    - country_polygon (GeoDataFrame): GeoDataFrame of country polygon.
+    -----------
+    frame : nx.MultiDiGraph
+        Frame graph
+    area_polygon : gpd.GeoDataFrame
+        GeoDataFrame with boundary of the inverstigated region
+    regions_polygons : gpd.GeoDataFrame
+        GeoDataFrame with polygons of the regions with 'name' column
+    country_polygon : gpd.GeoDataFrame
+        GeoDataFrame with boundary of the inverstigated country
 
-
-    Returns:
-    - GeoDataFrame: Updated GeoDataFrame with the 'exit' attribute.
+    Returns
+    -------
+    nx.MultiDiGraph 
+        Frame with assigned 'exit', 'exit_country' and 'boorder_region' node attributes
     """
 
     gdf_nodes = momepy.nx_to_gdf(frame)[0]
@@ -120,7 +197,7 @@ def mark_exits(
     gdf_nodes["exit_country"] = gdf_nodes["exit_country"].fillna(False)
     gdf_nodes = add_region_attr(gdf_nodes, regions_polygons, area_polygon)
 
-    for i, (node, data) in enumerate(frame.nodes(data=True)):
+    for i, data in enumerate(frame.nodes(data=True)[1]):
         data["exit"] = gdf_nodes.iloc[i]["exit"]
         data["exit_country"] = gdf_nodes.iloc[i]["exit_country"]
         data["border_region"] = gdf_nodes.iloc[i]["border_region"]
@@ -128,17 +205,25 @@ def mark_exits(
     return frame
 
 
-def add_region_attr(n: gpd.GeoDataFrame, regions: gpd.GeoDataFrame, polygon_buffer: gpd.GeoDataFrame):
+def add_region_attr(n: gpd.GeoDataFrame, 
+                    regions: gpd.GeoDataFrame, 
+                    polygon_buffer: gpd.GeoDataFrame)-> gpd.GeoDataFrame:
     """
     Add a 'border_region' attribute to nodes based on their intersection with region polygons.
 
-    Parameters:
-    - n (GeoDataFrame): Nodes GeoDataFrame with 'exit' attribute.
-    - regions (GeoDataFrame): Regions GeoDataFrame with an 'id' column.
-    - polygon_buffer (GeoDataFrame): GeoDataFrame of the buffer polygon.
+    Parameters
+    ----------
+    n : gpd.GeoDataFrame
+        Nodes GeoDataFrame with 'exit' and 'exit_country' attributes
+    regions : GeoDataFrame
+        Regions GeoDataFrame with 'name' column
+    polygon_buffer : gpd.GeoDataFrame
+        GeoDataFrame of region of interest boundary
 
-    Returns:
-    - GeoDataFrame: Updated nodes GeoDataFrame with 'border_region' attribute.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Updated nodes GeoDataFrame with 'border_region' attribute
     """
     exits = n[n["exit"] == 1]
     exits = exits.to_crs(n.crs)
@@ -156,15 +241,21 @@ def add_region_attr(n: gpd.GeoDataFrame, regions: gpd.GeoDataFrame, polygon_buff
     return n
 
 
-def _filter_polygons_by_buffer(gdf_polygons: gpd.GeoDataFrame, polygon_buffer: Polygon, crs):
+def _filter_polygons_by_buffer(gdf_polygons: gpd.GeoDataFrame, 
+                               polygon_buffer: Polygon, 
+                               crs)-> gpd.GeoDataFrame:
     """
     Extract and filter region polygons based on a buffer around a given polygon.
 
-    Parameters:
-    - gdf_polygons (GeoDataFrame): GeoDataFrame of all region polygons.
-    - polygon_buffer (Polygon): Polygon of the buffer polygon.
+    Parameters
+    -----------
+    gdf_polygons : gpd.GeoDataFrame
+        Gdf of regions polygons
+    polygon_buffer : Polygon
+        Polygon of the buffer polygon.
 
-    Returns:
+    Returns
+    -------
     - GeoDataFrame: Filtered GeoDataFrame of region polygons.
     """
     gdf_polygons = gdf_polygons.to_crs(crs)
@@ -178,25 +269,32 @@ def _filter_polygons_by_buffer(gdf_polygons: gpd.GeoDataFrame, polygon_buffer: P
     return filtered_gdf
 
 
-def plot_frame(frame, basemap=ctx.providers.OpenStreetMap.Mapnik, zoom_out_factor=1.1):
+def plot_frame(frame: nx.MultiDiGraph, 
+               zoom_out_factor: float = 1.1) -> None:
     """
-    Plot the frame with customized styles.
+    Plot the transport frame with exit points, city nodes, and categorized roads.
 
-    - **Edges**:
-      - reg == 1 → Red
-      - reg == 2 → Blue
-    - **Nodes**:
-      - exit == 1 → Green
-      - exit_country == 1 → Black
-      - city_name.notna() → Red
+    The function visualizes the road network using a basemap and styles edges and nodes based on their attributes:
+    
+    - **Edges (Road Segments)**:
+      - `reg == 1` → Red (Higher priority roads)
+      - `reg == 2` → Blue (Lower priority roads)
+    - **Nodes (Intersections & Key Points)**:
+      - `exit == 1` → Green (Exit points)
+      - `exit_country == 1` → Black (Country exit points)
+      - `city_name.notna()` → Red (City center nodes)
 
-    Parameters:
-    - `frame` (nx.MultiDiGraph): The road network graph.
-    - `basemap` (contextily provider, optional): Basemap provider (default: OpenStreetMap.Mapnik).
-    - `zoom_out_factor` (float, optional): Factor for slight zooming out (default: `1.1`).
+    Parameters
+    ----------
+    frame : nx.MultiDiGraph
+        The road network graph.
+    zoom_out_factor : float, optional
+        Scaling factor to adjust the map extent by zooming out (default: `1.1`).
 
-    Returns:
-    - Displays a **single** plot with basemap and styled nodes/edges.
+    Returns
+    -------
+    None
+        Displays a styled transport frame plot with a basemap and legend.
     """
     # Convert graph to GeoDataFrames
     nodes, edges = momepy.nx_to_gdf(frame)
@@ -218,6 +316,7 @@ def plot_frame(frame, basemap=ctx.providers.OpenStreetMap.Mapnik, zoom_out_facto
     ax.set_ylim(ymin - y_margin, ymax + y_margin)
 
     # Add basemap
+    basemap = ctx.providers.OpenStreetMap.Mapnik = ctx.providers.OpenStreetMap.Mapnik
     ctx.add_basemap(ax, source=basemap, crs=3857, alpha=0.7)
 
     # **Plot edges (roads)**
@@ -243,25 +342,25 @@ def plot_frame(frame, basemap=ctx.providers.OpenStreetMap.Mapnik, zoom_out_facto
 
 def weigh_roads(frame: nx.MultiDiGraph, restricted_terr_gdf: gpd.GeoDataFrame = None) -> gpd.GeoDataFrame:
     """
-    Calculate and normalize the weights of roads in a road network based on the proximity of exits.
+    Assigns and normalizes weights for roads in the network based on their proximity to exits.
 
-    This method assigns weights to the road segments (edges) in the network based on their
-    connections to exits and the types of regions they traverse. It normalizes the weights
-    for further analysis.
+    The function calculates road segment (edge) weights by evaluating their connections to 
+    exit points and the type of regions they traverse. If provided, restricted territories 
+    influence weight assignment. The function then normalizes weights for further analysis.
 
-    Parameters:
-    - n (gpd.GeoDataFrame): GeoDataFrame containing nodes of the road network, where each
-                            node represents an intersection or exit.
-    - e (gpd.GeoDataFrame): GeoDataFrame containing edges of the road network, where each
-                            edge represents a road segment with 'time_min' as a weight attribute.
-    - frame (nx.MultiDiGraph): The road network graph where nodes represent intersections
-                                or exits, and edges represent road segments.
-    - restricted_terr (gpd.GeoDataFrame): GeoDataFrame containing restricted areas that may
-                                            affect road weights.
+    Parameters
+    ----------
+    frame : nx.MultiDiGraph
+        The road network graph where nodes represent intersections or exits, 
+        and edges represent road segments.
+    restricted_terr_gdf : gpd.GeoDataFrame, optional
+        GeoDataFrame containing restricted territories that may influence 
+        road weight calculations (default: `None`).
 
-    Returns:
-    - gpd.GeoDataFrame: A tuple containing two GeoDataFrames (nodes and edges) with
-                        updated weights and normalized weights for further analysis.
+    Returns
+    -------
+    nx.MultiDiGraph
+        The updated road network graph with assigned and normalized road segment weights.
     """
     frame = frame.copy()
     n, e = momepy.nx_to_gdf(frame)
@@ -318,12 +417,6 @@ def weigh_roads(frame: nx.MultiDiGraph, restricted_terr_gdf: gpd.GeoDataFrame = 
     e["norm_weight"] = (e["weight"] - min_weight) / (max_weight - min_weight)
 
     for i, (e1, e2, k, data) in enumerate(frame.edges(data=True, keys=True)):
-        # if 'ref' in data:
-        #     del data['ref']
-        # if 'highway' in data:
-        #     del data['highway']
-        # if 'maxspeed' in data:
-        #     del data['maxspeed']
         data["weight"] = e.iloc[[i]]["weight"][i]
         data["norm_weight"] = e.iloc[[i]]["norm_weight"][i]
 
@@ -336,31 +429,33 @@ def weigh_roads(frame: nx.MultiDiGraph, restricted_terr_gdf: gpd.GeoDataFrame = 
     return frame
 
 
-def _mark_ref_type(
-    n: gpd.GeoDataFrame, e: gpd.GeoDataFrame, frame: nx.MultiDiGraph
+def _mark_ref_type(n: gpd.GeoDataFrame, 
+                   e: gpd.GeoDataFrame, 
+                   frame: nx.MultiDiGraph
 ) -> tuple[gpd.GeoDataFrame, gpd.GeoDataFrame, nx.MultiDiGraph]:
     """
-    Mark reference types for nodes in the road network based on the nearest reference edges.
+    Assign reference types to nodes in the road network based on proximity to reference edges.
 
-    This method assigns a reference value and its type to nodes in the network based on their
-    proximity to edges that have reference attributes. It updates the nodes GeoDataFrame
-    with the reference values and types for exits.
+    This function identifies nodes marked as exits and assigns reference values and types 
+    based on the closest reference edge. The assigned values help categorize roads 
+    according to their significance.
 
-    Parameters:
-    - n (gpd.GeoDataFrame): GeoDataFrame containing nodes of the road network, which
-                            may include exit nodes to be marked with reference types.
-    - e (gpd.GeoDataFrame): GeoDataFrame containing edges of the road network, which
-                            includes reference attributes used to determine node reference types.
-    - frame (nx.MultiDiGraph): The road network graph where nodes represent intersections
-                                or exits.
+    Parameters
+    ----------
+    n : gpd.GeoDataFrame
+        GeoDataFrame of road network nodes, including exit nodes to be marked with reference types.
+    e : gpd.GeoDataFrame
+        GeoDataFrame of road network edges containing reference attributes used for classification.
+    frame : nx.MultiDiGraph
+        The road network graph where nodes represent intersections or exits.
 
-    Returns:
-    - tuple[gpd.GeoDataFrame, gpd.GeoDataFrame, nx.MultiDiGraph]: A tuple containing:
-    - Updated GeoDataFrame of nodes with assigned reference values and types.
-    - The original GeoDataFrame of edges.
-    - The updated road network graph with relabeled nodes.
+    Returns
+    -------
+    tuple[gpd.GeoDataFrame, gpd.GeoDataFrame, nx.MultiDiGraph]
+        - Updated GeoDataFrame of nodes with assigned reference values and types.
+        - The original GeoDataFrame of edges.
+        - The updated road network graph with relabeled nodes.
     """
-
     n["ref"] = None
     ref_edges = e[e["ref"].notna()]
 
@@ -386,7 +481,23 @@ def _mark_ref_type(
 
 
 def _determine_ref_type(ref: str) -> float:
-    """Converts ref string to numeric type"""
+    """
+    Convert a reference string into a numeric classification.
+
+    This function categorizes road references based on predefined patterns, 
+    assigning a numeric value that represents the road type.
+
+    Parameters
+    ----------
+    ref : str
+        A road reference string that follows a standard naming convention.
+
+    Returns
+    -------
+    float
+        A numeric code corresponding to the identified reference type. If no match is found, 
+        a default classification (2.3) is assigned.
+    """
     patterns = {
         1.1: r"М-\d+",
         1.2: r"Р-\d+",
@@ -403,15 +514,25 @@ def _determine_ref_type(ref: str) -> float:
 
 def _get_weight(start: float, end: float, exit: bool) -> float:
     """
-    Calculate the weight based on the type of start and end references and exit status.
+    Compute the weight for a road segment based on reference types and exit status.
 
-    Parameters:
-    start (float): Reference type of the start node.
-    end (float): Reference type of the end node.
-    exit (int): Exit status (1 if exit, else 0).
+    This function determines the weight of a road connection by considering the reference types 
+    of the start and end nodes, as well as whether the segment represents an exit. Different 
+    weight matrices are used for exit and non-exit scenarios.
 
-    Returns:
-    float: Calculated weight based on the provided matrix.
+    Parameters
+    ----------
+    start : float
+        The reference type classification of the start node.
+    end : float
+        The reference type classification of the end node.
+    exit : bool
+        Indicates whether the segment represents an exit (True if exit, False otherwise).
+
+    Returns
+    -------
+    float
+        The weight value derived from the corresponding weight matrix.
     """
     dict = {1.1: 0, 1.2: 1, 1.3: 2, 2.1: 3, 2.2: 4, 2.3: 5, 0.0: 6, 0.5: 7}
     if exit == 1:
@@ -441,18 +562,29 @@ def _get_weight(start: float, end: float, exit: bool) -> float:
     return matrix[dict[end]][dict[start]]
 
 
-def plot_weighted_roads(weighted_graph, scaling_factor=10, zoom_out_factor=1.1):
+def plot_weighted_roads(
+    weighted_graph: nx.MultiDiGraph, scaling_factor: int = 10, zoom_out_factor: float = 1.1
+) -> None:
     """
-    Plot a weighted road network with a basemap.
+    Visualize a weighted road network on a map.
 
-    Parameters:
-    - scaling_factor (int, optional): Factor to adjust line thickness based on weight. Default is 10.
-    - basemap (contextily provider, optional): Basemap provider. Default is OpenStreetMap.Mapnik.
+    This function plots a road network where the thickness of edges corresponds to their 
+    assigned weights. The visualization includes a basemap for spatial context.
 
-    Returns:
-    - None (displays a plot)
+    Parameters
+    ----------
+    weighted_graph : nx.MultiDiGraph
+        The road network graph where edges contain weight attributes.
+    scaling_factor : int, optional
+        Factor to scale line thickness based on edge weight (default: 10).
+    zoom_out_factor : float, optional
+        Factor to slightly expand the map view beyond the network boundaries (default: 1.1).
+
+    Returns
+    -------
+    None
+        Displays the road network plot with weighted edges.
     """
-
     nodes, edges = momepy.nx_to_gdf(weighted_graph)
 
     # Filter only weighted edges

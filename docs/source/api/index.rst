@@ -1,7 +1,7 @@
 API documentation
 =================
 
-The modules of MyPackage are listed below:
+The modules of Transport_frames are listed below:
 
 .. autosummary::
    :toctree: _autosummary

@@ -1,5 +1,5 @@
 Transport Frames
-=========
+================
 
 .. logo-start
 
@@ -8,7 +8,7 @@ Transport Frames
 
 .. logo-end
 
-|Documentation Status| |PythonVersion| |Black| |Readme_ru|
+|Documentation Status| |PythonVersion| |Black| 
 
 .. description-start
 
@@ -23,22 +23,23 @@ Transport Frames
 - Aggregate **administrative-level statistics** by computing transport indicators at different spatial scales (regions, districts, etc.).
 - Analyze **territory-specific indicators** by using buffer-based calculations around the center of a given territory.
 
+.. description-end
 
 Features
-------------------
+--------
 
 .. features-start
 
 
 🚏 **Frame and Road Network Analysis**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Constructs **frames** from drive graphs to analyze road connectivity.
 - Investigates **priority roads** based on estimated route popularity.
 - Updates transport graphs by adding new edges and ensuring seamless network connectivity.
 
 🌍 **Territory Grading and Connectivity**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Grades territories based on **proximity to federal and regional roads**.
 - Computes **connectivity values** from road networks and accessibility to key transport services (bus stops, railways, airports, ports).
@@ -184,35 +185,35 @@ To start developing the library, one must perform following actions:
    never work on the ``main`` branch! Work on this copy on your
    computer using Git to do the version control.
 
-7. Update
-   `tests <https://github.com/blackcoster/transport_frames/tree/main/tests>`__
-   according to your changes and run the following command:
+.. 7. Update
+..    `tests <https://github.com/blackcoster/transport_frames/tree/main/tests>`__
+..    according to your changes and run the following command:
 
-   ::
+..    ::
 
-         $ make test
+..          $ make test
 
-   Make sure that all tests pass.
+..    Make sure that all tests pass.
 
-8. Update the
-   `documentation <https://github.com/blackcoster/transport_frames/tree/main/docs>`__
-   and **README** according to your changes.
+.. 8. Update the
+..    `documentation <https://github.com/blackcoster/transport_frames/tree/main/docs>`__
+..    and **README** according to your changes.
 
-9.  When you're done editing and local testing, run:
+.. 9.  When you're done editing and local testing, run:
 
-   ::
+..    ::
 
-         $ git add modified_files
-         $ git commit
+..          $ git add modified_files
+..          $ git commit
 
-   to record your changes in Git, then push them to GitHub with:
+..    to record your changes in Git, then push them to GitHub with:
 
-   ::
+..    ::
 
-            $ git push -u origin my-contribution
+..             $ git push -u origin my-contribution
 
-   Finally, go to the web page of your fork of the transport_frames repo, and click
-   'Pull Request' (PR) to send your changes to the maintainers for review.
+..    Finally, go to the web page of your fork of the transport_frames repo, and click
+..    'Pull Request' (PR) to send your changes to the maintainers for review.
 
 .. developing-end
 
@@ -221,15 +222,6 @@ License
 -------
 
 The project has `BSD-3-Clause license <./LICENSE>`__
-
-Acknowledgments
----------------
-
-.. acknowledgments-start
-
-Project_name
-
-.. acknowledgments-end
 
 Contacts
 --------

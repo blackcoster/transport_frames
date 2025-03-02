@@ -1,3 +1,5 @@
+""" Module for adding new roads to the graph """
+
 import warnings
 
 import geopandas as gpd

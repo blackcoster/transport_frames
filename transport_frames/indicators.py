@@ -1,3 +1,5 @@
+""" Module for getting area and territory indicators """
+
 import geopandas as gpd
 import momepy
 import networkx as nx
@@ -13,11 +15,27 @@ from transport_frames.utils.helper_funcs import BaseSchema
 
 
 class PolygonSchema(BaseSchema):
+    """
+    Schema for validating polygons.
+
+    Attributes
+    ----------
+    _geom_types : list
+        List of allowed geometry types for the blocks, default is [shapely.Polygon]
+    """
     name: Series[str] = pa.Field(nullable=True)
     _geom_types = [Polygon, MultiPolygon]
 
 
 class PointSchema(BaseSchema):
+    """
+    Schema for validating points.
+
+    Attributes
+    ----------
+    _geom_types : list
+        List of allowed geometry types for the points, default is [shapely.Point]
+    """
     _geom_types = [Point]
 
 
@@ -29,17 +47,26 @@ def calculate_distances(
     unit_div: int = 1000,
 ) -> gpd.GeoDataFrame:
     """
-    Calculate the minimum distances between two GeoDataFrames using a graph.
+    Compute the minimum distances from each point in the origin GeoDataFrame to the nearest 
+    point in the destination GeoDataFrame using the road network graph.
 
-    Parameters:
-    from_gdf (gpd.GeoDataFrame): The GeoDataFrame containing origin points.
-    to_gdf (gpd.GeoDataFrame): The GeoDataFrame containing destination points.
-    graph (nx.MultiDiGraph): The road network graph.
-    weight (str): The edge attribute used for distance calculation. Default is 'length_meter'.
-    unit_div (int): Factor to convert distance into desired units (default is 1000 for km).
+    Parameters
+    ----------
+    from_gdf : gpd.GeoDataFrame
+        GeoDataFrame containing origin points.
+    to_gdf : gpd.GeoDataFrame
+        GeoDataFrame containing destination points.
+    graph : nx.MultiDiGraph
+        Road network graph representing transport connections.
+    weight : str, optional
+        Edge attribute used for distance calculation (default is "length_meter").
+    unit_div : int, optional
+        Factor to convert distance into desired units (default is 1000 for km).
 
-    Returns:
-    gpd.GeoDataFrame: Series containing the minimum distances in specified units.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Series containing the minimum distances in the specified units.
     """
     if to_gdf is None or to_gdf.empty:
         return None
@@ -56,17 +83,25 @@ def get_distance_from(
     local_crs: int,
 ) -> gpd.GeoDataFrame:
     """
-    Compute the median distance from settlement points to a specific point within given area polygons.
+    Calculate the median distance from settlement points to a reference point within specified area polygons.
 
-    Parameters:
-    point (gpd.GeoDataFrame): The reference point to measure distances from.
-    settlement_points (gpd.GeoDataFrame): The GeoDataFrame of settlement points.
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
-    graph (nx.MultiDiGraph): The transport graph.
-    local_crs (int): The coordinate reference system to use.
+    Parameters
+    ----------
+    point : gpd.GeoDataFrame
+        GeoDataFrame containing the reference point to measure distances from.
+    settlement_points : gpd.GeoDataFrame
+        GeoDataFrame containing settlement points.
+    area_polygons : gpd.GeoDataFrame
+        GeoDataFrame representing area polygons.
+    graph : nx.MultiDiGraph
+        Transport network graph.
+    local_crs : int
+        Coordinate reference system (CRS) to use.
 
-    Returns:
-    gpd.GeoDataFrame: The median distance to the point within each area polygon.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        GeoDataFrame with median distances to the reference point for each area polygon.
     """
     distances = calculate_distances(settlement_points.to_crs(local_crs), point.to_crs(local_crs), graph)
     settlement_points = settlement_points.copy()
@@ -83,16 +118,23 @@ def get_distance_to_region_admin_center(
     graph: nx.MultiDiGraph,
 ) -> gpd.GeoDataFrame:
     """
-    Calculate the median distance from settlements to the regional administrative center within area polygons.
+    Compute the median distance from settlements to the regional administrative center for each area polygon.
 
-    Parameters:
-    region_admin_center (gpd.GeoDataFrame): The regional administrative center point.
-    settlement_points (gpd.GeoDataFrame): The settlement points.
-    area_polygons (gpd.GeoDataFrame): The polygons representing regions.
-    graph (nx.MultiDiGraph): The transport network graph.
+    Parameters
+    ----------
+    region_admin_center : gpd.GeoDataFrame
+        GeoDataFrame containing the regional administrative center point.
+    settlement_points : gpd.GeoDataFrame
+        GeoDataFrame containing settlement points.
+    area_polygons : gpd.GeoDataFrame
+        GeoDataFrame representing the area polygons.
+    graph : nx.MultiDiGraph
+        Transport network graph.
 
-    Returns:
-    gpd.GeoDataFrame: Updated area polygons with a new column for the median distance to the regional admin center.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Updated area polygons with a new column for median distances to the regional administrative center.
     """
     local_crs = graph.graph["crs"]
     area_polygons = PolygonSchema(area_polygons).copy()
@@ -105,20 +147,26 @@ def get_distance_to_region_admin_center(
     return area_polygons.to_crs(4326)
 
 
+
 def get_distance_to_federal_roads(
     settlement_points: gpd.GeoDataFrame, area_polygons: gpd.GeoDataFrame, graph: nx.MultiDiGraph
 ) -> gpd.GeoDataFrame:
     """
-    Calculate the median distance from settlements to federal roads within area polygons.
+    Compute the median distance from settlements to federal roads for each area polygon.
 
-    Parameters:
-    settlement_points (gpd.GeoDataFrame): The settlement points.
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
-    graph (nx.MultiDiGraph): The transport network graph.
-    local_crs (int): The coordinate reference system.
+    Parameters
+    ----------
+    settlement_points : gpd.GeoDataFrame
+        GeoDataFrame containing settlement points.
+    area_polygons : gpd.GeoDataFrame
+        GeoDataFrame representing the area polygons.
+    graph : nx.MultiDiGraph
+        Transport network graph.
 
-    Returns:
-    gpd.GeoDataFrame: Updated area polygons with a new column for the median distance to federal roads.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Updated area polygons with a new column for median distances to federal roads.
     """
     area_polygons = PolygonSchema(area_polygons).copy()
 
@@ -139,16 +187,25 @@ def get_connectivity(
     adj_mx: pd.DataFrame = None,
 ) -> gpd.GeoDataFrame:
     """
-    Calculate connectivity within area polygons based on settlement points and a transport graph.
+    Calculate connectivity scores for each area polygon based on settlement points and a transport network.
 
-    Parameters:
-    settlement_points (gpd.GeoDataFrame): GeoDataFrame of settlement points.
-    graph (nx.MultiDiGraph): The transport graph.
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
-    adj_mx (pd.DataFrame, optional): Precomputed adjacency matrix. Defaults to None.
+    Parameters
+    ----------
+    settlement_points : gpd.GeoDataFrame
+        GeoDataFrame containing settlement points.
+    area_polygons : gpd.GeoDataFrame
+        GeoDataFrame representing area polygons.
+    local_crs : int
+        Coordinate reference system (CRS) to use.
+    graph : nx.MultiDiGraph, optional
+        Transport network graph (required if adjacency matrix is not provided).
+    adj_mx : pd.DataFrame, optional
+        Precomputed adjacency matrix.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with connectivity values.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Area polygons with computed connectivity values.
     """
     if adj_mx is None:
         if adj_mx is None and graph is None:
@@ -175,15 +232,20 @@ def get_road_length(graph: nx.MultiDiGraph, area_polygons: gpd.GeoDataFrame) -> 
     """
     Calculate the total road length within each area polygon.
 
-    Parameters:
-    graph (nx.MultiDiGraph): The transport graph.
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
+    Parameters
+    ----------
+    graph : nx.MultiDiGraph
+        Transport network graph.
+    area_polygons : gpd.GeoDataFrame
+        GeoDataFrame representing area polygons.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with road length values.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Area polygons with an additional column indicating the total road length (in kilometers).
     """
     area_polygons = PolygonSchema(area_polygons).copy()
-    n, e = momepy.nx_to_gdf(graph)
+    e = momepy.nx_to_gdf(graph)[1]
 
     grouped_length = (
         gpd.sjoin(e, area_polygons.to_crs(e.crs), how="left", predicate="within")
@@ -198,17 +260,22 @@ def get_road_length(graph: nx.MultiDiGraph, area_polygons: gpd.GeoDataFrame) -> 
 
 def get_road_density(graph: nx.MultiDiGraph, area_polygons: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Calculate the road density within each area polygon.
+    Compute road density for each area polygon.
 
-    Parameters:
-    graph (nx.MultiDiGraph): The transport graph.
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
+    Parameters
+    ----------
+    graph : nx.MultiDiGraph
+        Transport network graph.
+    area_polygons : gpd.GeoDataFrame
+        GeoDataFrame representing area polygons.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with road density values.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Area polygons with calculated road density (road length per unit area).
     """
     area_polygons = PolygonSchema(area_polygons).to_crs(graph.graph["crs"]).copy()
-    n, e = momepy.nx_to_gdf(graph)
+    e = momepy.nx_to_gdf(graph)[1]
 
     grouped_length = (
         gpd.sjoin(e, area_polygons.to_crs(e.crs), how="left", predicate="within")
@@ -224,17 +291,22 @@ def get_road_density(graph: nx.MultiDiGraph, area_polygons: gpd.GeoDataFrame) ->
 
 def get_reg_length(graph: nx.MultiDiGraph, area_polygons: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Calculate the length of roads by regional classification within each area polygon.
+    Compute the total length of roads by regional classification within each area polygon.
 
-    Parameters:
-    graph (nx.MultiDiGraph): The transport graph.
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
+    Parameters
+    ----------
+    graph : nx.MultiDiGraph
+        The transport network graph.
+    area_polygons : gpd.GeoDataFrame
+        The polygons representing the areas of interest.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with road length for each regional category.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Updated area polygons with additional columns for road length by regional classification.
     """
     area_polygons = PolygonSchema(area_polygons).copy()
-    n, e = momepy.nx_to_gdf(graph)
+    e = momepy.nx_to_gdf(graph)[1]
     for reg in [1, 2, 3]:
         roads = e[e["reg"] == reg]
         grouped_length = (
@@ -247,21 +319,22 @@ def get_reg_length(graph: nx.MultiDiGraph, area_polygons: gpd.GeoDataFrame) -> g
     return area_polygons.to_crs(4326)
 
 
-def get_service_count(
-    area_polygons: gpd.GeoDataFrame,
-    service: gpd.GeoDataFrame,
-) -> gpd.GeoDataFrame:
+def get_service_count(area_polygons: gpd.GeoDataFrame, service: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Count the number of services within each area polygon.
+    Count the number of service points located within each area polygon.
 
-    Parameters:
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
-    service (gpd.GeoDataFrame): Services points.
+    Parameters
+    ----------
+    area_polygons : gpd.GeoDataFrame
+        The polygons representing areas of interest.
+    service : gpd.GeoDataFrame
+        The GeoDataFrame containing service points.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with service counts.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Area polygons with an added column for the number of services.
     """
-
     area_polygons = PolygonSchema(area_polygons).copy()
     service_counts = gpd.GeoDataFrame(index=area_polygons.index)
 
@@ -280,21 +353,26 @@ def get_service_accessibility(
     graph: nx.MultiDiGraph,
     area_polygons: gpd.GeoDataFrame,
     service: gpd.GeoDataFrame,
-):
-
+) -> gpd.GeoDataFrame:
     """
-    Compute median accessibility time to various transport services for each area polygon.
+    Compute the median accessibility time from settlements to transport services within each area polygon.
 
-    Parameters:
-    settlement_points (gpd.GeoDataFrame): GeoDataFrame containing settlement points.
-    graph (nx.MultiDiGraph): The transport graph.
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
-    service (gpd.GeoDataFrame): GeoDataFrame of service points.
+    Parameters
+    ----------
+    settlement_points : gpd.GeoDataFrame
+        GeoDataFrame containing settlement points.
+    graph : nx.MultiDiGraph
+        The transport network graph.
+    area_polygons : gpd.GeoDataFrame
+        The polygons representing areas of interest.
+    service : gpd.GeoDataFrame
+        GeoDataFrame of transport service points.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with computed median accessibility times for each service.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Area polygons with computed median accessibility times for each service.
     """
-
     settlement_points = PointSchema(settlement_points).copy()
     area_polygons = PolygonSchema(area_polygons).to_crs(graph.graph["crs"]).copy()
     settlement_points = settlement_points.to_crs(graph.graph["crs"]).copy()
@@ -332,16 +410,22 @@ def get_bus_routes_num(
     """
     Calculate the number of unique bus routes intersecting each area polygon.
 
-    Parameters:
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
-    bus_edges (gpd.GeoDataFrame, optional): GeoDataFrame containing bus network edges with route attributes.
-    public_transport_graph (nx.MultiDiGraph, optional): The public transport graph.
-    polygon_gdf (gpd.GeoDataFrame, optional): A polygon GeoDataFrame to extract public transport graph.
+    Parameters
+    ----------
+    area_polygons : gpd.GeoDataFrame
+        The polygons representing areas of interest.
+    bus_edges : gpd.GeoDataFrame, optional
+        GeoDataFrame containing bus network edges with route attributes.
+    public_transport_graph : nx.MultiDiGraph, optional
+        The public transport graph.
+    polygon_gdf : gpd.GeoDataFrame, optional
+        A polygon GeoDataFrame used to extract the public transport graph.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with the number of unique bus routes.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Area polygons with an additional column indicating the number of unique bus routes.
     """
-
     ## bus routes should have route parameter in edges
     area_polygons = PolygonSchema(area_polygons).copy()
 
@@ -370,13 +454,19 @@ def get_railway_length(
     """
     Calculate the total railway length within each area polygon.
 
-    Parameters:
-    railway_paths (gpd.GeoDataFrame): Railway paths as a GeoDataFrame.
-    area_polygons (gpd.GeoDataFrame): The polygons representing areas of interest.
-    local_crs (int): The coordinate reference system.
+    Parameters
+    ----------
+    railway_paths : gpd.GeoDataFrame
+        GeoDataFrame containing railway path geometries.
+    area_polygons : gpd.GeoDataFrame
+        The polygons representing areas of interest.
+    local_crs : int
+        The coordinate reference system to use.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with railway length values.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Area polygons with an added column indicating the railway length (in kilometers).
     """
     area_polygons = PolygonSchema(area_polygons.to_crs(local_crs)).copy()
 
@@ -389,27 +479,26 @@ def get_railway_length(
 
 
 def get_terr_service_accessibility(
-    graph: nx.MultiDiGraph,
-    territory_polygon: gpd.GeoDataFrame,
-    service: gpd.GeoDataFrame,
+    graph: nx.MultiDiGraph, territory_polygon: gpd.GeoDataFrame, service: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
     """
-    Computes service accessibility indicators for a given territory polygon.
+    Compute service accessibility indicators for a given territory.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     graph : nx.MultiDiGraph
-        A networkx MultiDiGraph representing the transport network.
+        The transport network graph.
     territory_polygon : gpd.GeoDataFrame
-    service: gpd.GeoDataFrame
-        A gdf representing service points
+        Polygon representing the territory of interest.
+    service : gpd.GeoDataFrame
+        GeoDataFrame containing service points.
 
-    Returns:
-    --------
+    Returns
+    -------
     gpd.GeoDataFrame
-        A GeoDataFrame containing the territories with added columns:
-        - 'number_of_{service}': Number of service points inside each territory.
-        - 'service_accessibility': 0 if the service is inside, otherwise the minimum travel time.
+        Updated territory polygons with:
+        - 'number_of_service': Count of services inside.
+        - 'service_accessibility': Travel time to the nearest service.
     """
     # terr = districts_polygons.iloc[[6]].reset_index(drop=True).copy()
     terr = PolygonSchema(territory_polygon).to_crs(graph.graph["crs"]).copy()
@@ -441,17 +530,22 @@ def get_terr_service_count(
     territory_polygon: gpd.GeoDataFrame, service: gpd.GeoDataFrame, local_crs: int = 3856
 ) -> gpd.GeoDataFrame:
     """
-    Count the number of services within the territory polygon with 3 km buffer.
+    Count the number of service points within a given territory, considering a 3 km buffer.
 
-    Parameters:
-    territory_polygon (gpd.GeoDataFrame): The polygon(s) representing areas of interest.
-    service (gpd.GeoDataFrame): Service points gdf.
-    local_crs (int, optional)L local crs projection.
+    Parameters
+    ----------
+    territory_polygon : gpd.GeoDataFrame
+        The polygon(s) representing areas of interest.
+    service : gpd.GeoDataFrame
+        GeoDataFrame containing service points.
+    local_crs : int, optional
+        The coordinate reference system (default is 3856).
 
-    Returns:
-    gpd.GeoDataFrame: Territory polygon(s) with service counts.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Territory polygons with an added column indicating the number of services.
     """
-
     territory_polygon = PolygonSchema(territory_polygon).to_crs(local_crs).copy()
     territory_polygon["geometry"] = territory_polygon.geometry.buffer(3000)
     return get_service_count(territory_polygon, service).to_crs(4326)
@@ -459,16 +553,20 @@ def get_terr_service_count(
 
 def get_terr_road_density(graph: nx.MultiDiGraph, territory_polygon: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Calculate the road density within each area polygon.
+    Compute the road density within a given territory.
 
-    Parameters:
-    graph (nx.MultiDiGraph): The transport graph.
-    territory_polygon (gpd.GeoDataFrame): The polygon(s) representing territory.
+    Parameters
+    ----------
+    graph : nx.MultiDiGraph
+        The transport network graph.
+    territory_polygon : gpd.GeoDataFrame
+        The polygon(s) representing the territory.
 
-    Returns:
-    gpd.GeoDataFrame: Area polygons with road density values.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Territory polygons with an added column for road density.
     """
-
     territory_polygon = PolygonSchema(territory_polygon.to_crs(graph.graph["crs"])).copy()
     territory_polygon["geometry"] = territory_polygon.geometry.buffer(3000)
 
@@ -479,18 +577,22 @@ def get_terr_distance_to_region_admin_center(
     region_admin_center: gpd.GeoDataFrame, territory_polygon: gpd.GeoDataFrame, graph: nx.MultiDiGraph
 ) -> gpd.GeoDataFrame:
     """
-     Calculate the median distance from center of the territory to the regional administrative center.
+    Compute the median distance from a territory center to the regional administrative center.
 
-    Parameters:
-    region_admin_center (gpd.GeoDataFrame): The regional administrative center point.
-    territory_polygon (gpd.GeoDataFrame): The polygons representing territory.
-    graph (nx.MultiDiGraph): The transport network graph.
-    local_crs (int): The coordinate reference system.
+    Parameters
+    ----------
+    region_admin_center : gpd.GeoDataFrame
+        The regional administrative center point.
+    territory_polygon : gpd.GeoDataFrame
+        The polygons representing the territory.
+    graph : nx.MultiDiGraph
+        The transport network graph.
 
-    Returns:
-    gpd.GeoDataFrame: Updated area polygons with a new column for the median distance to the regional admin center.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Updated territory polygons with a new column for the median distance to the regional admin center.
     """
-
     local_crs = graph.graph["crs"]
     terr = PolygonSchema(territory_polygon).to_crs(local_crs).reset_index(drop=True).copy()
     terr["geometry"] = terr.geometry.buffer(3000)
@@ -510,39 +612,44 @@ def get_terr_distance_to_region_admin_center(
 
 def get_terr_nature_distance(
     territory: gpd.GeoDataFrame,
-    object: gpd.GeoDataFrame,
-    #    nature_reserve: gpd.GeoDataFrame = None,
+    nature_objects: gpd.GeoDataFrame,
     local_crs: int = 3857,
 ) -> gpd.GeoDataFrame:
     """
-    Compute the number of services and minimum accessibility distance for each polygon in `territory`
-    without iteration, using only GeoPandas.
+    Compute the number of nature objects within a territory and the distance to the nearest one.
 
-    Parameters:
-    territory (gpd.GeoDataFrame): The area polygons where service accessibility is calculated.
-    object (gpd.GeoDataFrame, optional): Polygons of nature objects.
-    local_crs (int): The coordinate reference system.
+    Parameters
+    ----------
+    territory : gpd.GeoDataFrame
+        The area polygons where nature accessibility is calculated.
+    nature_objects : gpd.GeoDataFrame
+        GeoDataFrame containing nature objects (e.g., parks, reserves).
+    local_crs : int, optional
+        The coordinate reference system (default is 3857).
 
-    Returns:
-    gpd.GeoDataFrame: Updated `territory` with added service accessibility columns.
+    Returns
+    -------
+    gpd.GeoDataFrame
+        Updated `territory` with:
+        - 'number_of_objects': Count of nature objects within.
+        - 'objects_accessibility': Distance to the nearest nature object.
     """
-
     terr = PolygonSchema(territory).to_crs(local_crs).copy()
 
-    object = object.to_crs(local_crs).copy()
+    nature_objects = nature_objects.to_crs(local_crs).copy()
     terr[f"number_of_objects"] = 0  # Initialize the column with 0s
 
     for i, row in terr.iterrows():
-        if object.empty:
+        if nature_objects.empty:
             terr.at[i, "objects_accessibility"] = None
         else:
             row_temp = gpd.GeoDataFrame(index=[i], geometry=[row.geometry], crs=local_crs)
-            terr.at[i, "number_of_objects"] = len(gpd.overlay(object, row_temp, keep_geom_type=False))
+            terr.at[i, "number_of_objects"] = len(gpd.overlay(nature_objects, row_temp, keep_geom_type=False))
             if terr.at[i, "number_of_objects"] > 0:
                 terr.at[i, "objects_accessibility"] = 0.0
             else:
                 terr.at[i, "objects_accessibility"] = round(
-                    gpd.sjoin_nearest(row_temp, object, how="inner", distance_col="dist")["dist"].min() / 1000, 3
+                    gpd.sjoin_nearest(row_temp, nature_objects, how="inner", distance_col="dist")["dist"].min() / 1000, 3
                 )
 
     return terr.to_crs(4326)
@@ -556,28 +663,27 @@ def get_terr_nearest_centers(
     local_crs: int = 3857,
 ) -> gpd.GeoDataFrame:
     """
-    Computes distances to nearest district and settlement centers and road density for a given territory.
+    Compute distances from a territory to the nearest district and settlement centers.
 
-    Parameters:
+    Parameters
     ----------
     territory : gpd.GeoDataFrame
-        The area polygons where distances and road density are calculated.
-    graph: nx.MultiDiGraph
-        The drive graph of the area
+        The polygons representing the territory.
+    graph : nx.MultiDiGraph
+        The transport network graph.
     districts : gpd.GeoDataFrame, optional
-        District polygons for intersection filtering.
+        GeoDataFrame of district boundaries.
     centers_points : gpd.GeoDataFrame, optional
-        Points representing district/settlement centers.
-    local_crs : int, default=3857
-        The coordinate reference system.
+        GeoDataFrame containing district/settlement centers.
+    local_crs : int, optional
+        The coordinate reference system (default is 3857).
 
-    Returns:
+    Returns
     -------
     gpd.GeoDataFrame
-        Updated `territory` with:
-        - 'to_nearest_district_center_km': Distance to nearest district center.
+        Updated territory polygons with:
+        - 'to_nearest_district_center_km': Distance to the nearest district center.
     """
-
     # Convert to consistent CRS
     territory = PolygonSchema(territory).to_crs(local_crs).copy()
     centers_points = PointSchema(centers_points).to_crs(local_crs).copy()

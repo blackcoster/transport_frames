@@ -1,20 +1,29 @@
 Welcome to Transport_frames documentation!
-====================================
+==========================================
+
 
 .. include:: ../../README.rst
    :start-after: .. logo-start
    :end-before: .. logo-end
 
+.. include:: ../../README.rst
+   :start-after: .. description-start
+   :end-before: .. description-end
+
 Documentation:
 --------------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   guide/index
+   transport_frames/index
    examples/index
    api/index
 
+Features:
+---------
+
 .. include:: ../../README.rst
-   :start-after: .. readme-start
-   :end-before: .. readme-end
+   :start-after: .. features-start
+   :end-before: .. features-end
+

@@ -1,3 +1,5 @@
+""" Some helper funcs """
+
 import warnings
 
 import contextily as ctx
