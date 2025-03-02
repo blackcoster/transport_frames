@@ -239,3 +239,11 @@ You can contact us:
 .. contacts-end
 
 
+.. |Documentation Status| image:: https://github.com/blackcoster/transport_frames/actions/workflows/documentation.yml/badge.svg?branch=main
+   :target: https://blackcoster.github.io/transport_frames/
+.. |PythonVersion| image:: https://img.shields.io/badge/python-3.10-blue
+   :target: https://pypi.org/project/blocksnet/
+.. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+.. |Readme_ru| image:: https://img.shields.io/badge/lang-ru-yellow.svg
+   :target: README-RU.rst
