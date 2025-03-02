@@ -197,7 +197,7 @@ def mark_exits(
     gdf_nodes["exit_country"] = gdf_nodes["exit_country"].fillna(False)
     gdf_nodes = add_region_attr(gdf_nodes, regions_polygons, area_polygon)
 
-    for i, data in enumerate(frame.nodes(data=True)[1]):
+    for i, (node, data) in enumerate(frame.nodes(data=True)):
         data["exit"] = gdf_nodes.iloc[i]["exit"]
         data["exit_country"] = gdf_nodes.iloc[i]["exit_country"]
         data["border_region"] = gdf_nodes.iloc[i]["border_region"]
