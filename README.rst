@@ -71,7 +71,7 @@ Installation
 
 ::
 
-   pip install transport-frames==2.0.1
+   pip install transport-frames
 
 .. installation-end
 

@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project] # метаданные проекта
 name = "transport_frames" # название вашего проекта
-version = "2.0.1"
+version = "2.0.2"
 authors = [
     { name = "Polina Krupenina", email = "krupenina.p@mail.ru" },
-] # не забудьте поменять на свое имя :)
+] 
 description = "IDU research package boilerplate"
 readme = "README.rst"
 requires-python = ">=3.10"
