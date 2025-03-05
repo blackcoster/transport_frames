@@ -332,7 +332,8 @@ def assign_grades(
     remote_gecs = all_gecs_with_dist[all_gecs_with_dist["dist"] > 0]
     remote_gecs["public_access_quartile"] = np.minimum(remote_gecs["public_access_quartile"] + 1, 4)
     remote_gecs["car_access_quartile"] = np.minimum(remote_gecs["car_access_quartile"] + 1, 4)
-
+    remote_gecs = remote_gecs.drop_duplicates(subset="geometry")
+    
     norm_gecs = all_gecs_with_dist[all_gecs_with_dist["dist"] == 0]
     norm_gecs["intersection_area"] = norm_gecs.apply(
         lambda row: row["geometry"].intersection(accessibility_data.loc[row["index_right"], "geometry"]).area,
