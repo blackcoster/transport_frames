@@ -314,6 +314,8 @@ def assign_grades(
     # Ensure both GeoDataFrames have the same CRS
     accessibility_data = accessibility_data.to_crs(epsg=local_crs)
     graded_territories = graded_territories.to_crs(epsg=local_crs)
+    accessibility_data['in_car'] = accessibility_data['in_car'].fillna(np.inf)
+    accessibility_data['in_inter'] = accessibility_data['in_inter'].fillna(np.inf)
 
     # Calculate quartile ranks for 'in_car' and 'in_inter'
     accessibility_data["car_access_quartile"] = calculate_quartiles(accessibility_data, "in_car")
@@ -333,12 +335,15 @@ def assign_grades(
     remote_gecs["public_access_quartile"] = np.minimum(remote_gecs["public_access_quartile"] + 1, 4)
     remote_gecs["car_access_quartile"] = np.minimum(remote_gecs["car_access_quartile"] + 1, 4)
     remote_gecs = remote_gecs.drop_duplicates(subset="geometry")
-    
     norm_gecs = all_gecs_with_dist[all_gecs_with_dist["dist"] == 0]
     norm_gecs["intersection_area"] = norm_gecs.apply(
-        lambda row: row["geometry"].intersection(accessibility_data.loc[row["index_right"], "geometry"]).area,
-        axis=1,
-    )
+            lambda row: row["geometry"]
+            .intersection(accessibility_data.loc[row["index_right"], "geometry"])
+            .unary_union.area  # Ensures a single geometry
+            if isinstance(row["geometry"].intersection(accessibility_data.loc[row["index_right"], "geometry"]), (gpd.GeoSeries, pd.Series))
+            else row["geometry"].intersection(accessibility_data.loc[row["index_right"], "geometry"]).area,
+            axis=1,
+        )
     norm_gecs = norm_gecs.sort_values("intersection_area", ascending=False).drop_duplicates(subset="geometry")
 
     joined = pd.concat([norm_gecs, remote_gecs])
