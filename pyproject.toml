@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project] # метаданные проекта
 name = "transport_frames" # название вашего проекта
-version = "2.0.2"
+version = "2.0.5"
 authors = [
     { name = "Polina Krupenina", email = "krupenina.p@mail.ru" },
 ] 
