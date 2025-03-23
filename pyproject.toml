@@ -7,7 +7,7 @@ name = "transport_frames" # название вашего проекта
 version = "2.0.5"
 authors = [
     { name = "Polina Krupenina", email = "krupenina.p@mail.ru" },
-] 
+]
 description = "IDU research package boilerplate"
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -25,7 +25,9 @@ dependencies = [ # здесь необходимо вести все устан�
     "pandas>=2.1",
     "pyarrow==19.0.0",
     "pandera==0.22.1",
-    "iduedu==0.2.2"
+    "iduedu==0.2.2",
+    "pygeoops==0.4.0",
+    "shapely== 2.0.7"
 ]
 
 classifiers = [ # метаданные для описания проекта пользователям, например, на PyPI: какая лицензия, какое предназначение
