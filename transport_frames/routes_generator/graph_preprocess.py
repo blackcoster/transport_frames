@@ -15,16 +15,16 @@ def simplify_roads(roads_graph: nx.Graph, water_gdf=None) -> gpd.GeoDataFrame:
 
     _, roads_gdf = mp.nx_to_gdf(roads_graph)
     roads_buffer = roads_gdf.geometry.buffer(25, cap_style="round", join_style="mitre")
-    roads_union = roads_buffer.union_all()
+    roads_union = roads_buffer.unary_union
 
     if water_gdf is not None:
 
         water_gdf.to_crs(roads_gdf.crs, inplace=True)
-        water_union = water_gdf.union_all()
+        water_union = water_gdf.unary_union
 
         roads_diff = roads_union.difference(water_union)
 
-        bridges = roads_gdf.union_all()
+        bridges = roads_gdf.unary_union
         bridges_diff = bridges.intersection(water_union)
         bridges_diff = bridges_diff.buffer(25, cap_style="round", join_style="mitre")
 
