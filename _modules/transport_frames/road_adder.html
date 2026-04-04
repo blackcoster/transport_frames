@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.road_adder &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">transport_frames.road_adder</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for transport_frames.road_adder</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module for adding new roads to the graph &quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">momepy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">MultiPoint</span><span class="p">,</span> <span class="n">Point</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">nearest_points</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">unary_union</span>
+
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">TqdmWarning</span>
+
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">TqdmWarning</span><span class="p">)</span>
+
+<span class="n">_DEFAULT_SPEED_BY_REG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="mi">110</span> <span class="o">/</span> <span class="mf">3.6</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="mi">90</span> <span class="o">/</span> <span class="mf">3.6</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="mi">60</span> <span class="o">/</span> <span class="mf">3.6</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="_resolve_maxspeed"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder._resolve_maxspeed">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_resolve_maxspeed</span><span class="p">(</span><span class="n">maxspeed</span><span class="p">,</span> <span class="n">reg</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a positive speed value for edge creation.</span>
+
+<span class="sd">    If incoming `maxspeed` is missing or non-numeric, falls back to a default by `reg`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">candidate</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maxspeed</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">maxspeed</span><span class="p">:</span>
+            <span class="n">resolved</span> <span class="o">=</span> <span class="n">_resolve_maxspeed</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">resolved</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">resolved</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">maxspeed</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">matched</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\d+(?:\.\d+)?&quot;</span><span class="p">,</span> <span class="n">maxspeed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">matched</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">matched</span><span class="o">.</span><span class="n">group</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">maxspeed</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">candidate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span> <span class="ow">and</span> <span class="n">candidate</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+
+    <span class="n">reg_value</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reg_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">reg_value</span><span class="p">):</span>
+        <span class="n">reg_speed</span> <span class="o">=</span> <span class="n">_DEFAULT_SPEED_BY_REG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">reg_value</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">reg_speed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">reg_speed</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">_DEFAULT_SPEED_BY_REG</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="create_nodeID"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.create_nodeID">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">create_nodeID</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a new unique node ID.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: The new node ID.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">node_id</span>  <span class="c1"># holds the id of last created node</span>
+    <span class="n">node_id</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">node_id</span>  <span class="c1"># returns an id for new node</span></div>
+
+
+<div class="viewcode-block" id="find_nearest_node"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.find_nearest_node">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">find_nearest_node</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">Point</span><span class="p">,</span> <span class="n">nodes_gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">node_buffer</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the nearest node within a specified buffer distance.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        point (Point): The point to find the nearest node for.</span>
+<span class="sd">        nodes_gdf (gpd.GeoDataFrame): GeoDataFrame containing nodes.</span>
+<span class="sd">        node_buffer (float): The buffer distance within which to search for the nearest node.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: The ID of the nearest node, or None if no node is found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">node_buffer_geom</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">node_buffer</span><span class="p">)</span>
+    <span class="n">nearby_nodes</span> <span class="o">=</span> <span class="n">nodes_gdf</span><span class="p">[</span><span class="n">nodes_gdf</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">node_buffer_geom</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nearby_nodes</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">nearest_node</span> <span class="o">=</span> <span class="n">nearby_nodes</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">point</span><span class="p">)</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+        <span class="n">nearest_node_id</span> <span class="o">=</span> <span class="n">nearby_nodes</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">nearest_node</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">nearest_node_id</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="find_nearest_road_point"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.find_nearest_road_point">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">find_nearest_road_point</span><span class="p">(</span><span class="n">point</span><span class="p">:</span> <span class="n">Point</span><span class="p">,</span> <span class="n">roads_gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">road_buffer</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the nearest road and the closest point on that road within a specified buffer distance.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        point (Point): The point to find the nearest road for.</span>
+<span class="sd">        roads_gdf (gpd.GeoDataFrame): GeoDataFrame containing roads.</span>
+<span class="sd">        road_buffer (float): The buffer distance within which to search for the nearest road.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing the nearest roads GeoDataFrame and the nearest point on the road, or (None, None) if no road is found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">point_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">point</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="n">roads_gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+    <span class="c1"># Perform a spatial join to find the nearest road within the buffer distance</span>
+    <span class="n">nearest_roads_all</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span>
+        <span class="n">point_gdf</span><span class="p">,</span>
+        <span class="n">roads_gdf</span><span class="p">,</span>
+        <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+        <span class="n">max_distance</span><span class="o">=</span><span class="n">road_buffer</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nearest_roads_all</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">right_index_col</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">nearest_roads_all</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;index_right&quot;</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">right_index_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">&quot;Could not find right-index column in sjoin_nearest result. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Available columns: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">nearest_roads_all</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">nearest_roads</span> <span class="o">=</span> <span class="n">roads_gdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">nearest_roads_all</span><span class="p">[</span><span class="n">right_index_col</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()]</span>
+        <span class="n">nearest_point_on_road</span> <span class="o">=</span> <span class="n">nearest_points</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">nearest_roads</span><span class="o">.</span><span class="n">geometry</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">nearest_roads</span><span class="p">,</span> <span class="n">nearest_point_on_road</span>
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="make_edge_data"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.make_edge_data">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">make_edge_data</span><span class="p">(</span>
+    <span class="n">edge_geom</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span>
+    <span class="n">maxspeed</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">reg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">local_crs</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">end</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nodes_gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bidirectional</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">flag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a GeoDataFrame with edge data based on geometry and other attributes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        edge_geom (LineString): The geometry of the edge.</span>
+<span class="sd">        maxspeed (float): The maximum speed on the edge.</span>
+<span class="sd">        reg (int): The region identifier.</span>
+<span class="sd">        local_crs (str): The coordinate reference system.</span>
+<span class="sd">        start (int, optional): The starting node ID. Defaults to None.</span>
+<span class="sd">        end (int, optional): The ending node ID. Defaults to None.</span>
+<span class="sd">        nodes_gdf (gpd.GeoDataFrame, optional): GeoDataFrame of nodes. Defaults to None.</span>
+<span class="sd">        bidirectional (bool, optional): If True, creates a bidirectional edge. Defaults to True.</span>
+<span class="sd">        flag (str, optional): Additional information for the edge. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gpd.GeoDataFrame: A GeoDataFrame containing the edge data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">resolved_speed</span> <span class="o">=</span> <span class="n">_resolve_maxspeed</span><span class="p">(</span><span class="n">maxspeed</span><span class="p">,</span> <span class="n">reg</span><span class="p">)</span>
+    <span class="n">edge_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;length_meter&quot;</span><span class="p">:</span> <span class="n">edge_geom</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">edge_geom</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;car&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;time_sec&quot;</span><span class="p">:</span> <span class="n">edge_geom</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="n">resolved_speed</span><span class="p">,</span>
+        <span class="s2">&quot;time_min&quot;</span><span class="p">:</span> <span class="n">edge_geom</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="p">(</span><span class="n">resolved_speed</span> <span class="o">*</span> <span class="mi">60</span><span class="p">),</span>
+        <span class="s2">&quot;highway&quot;</span><span class="p">:</span> <span class="s2">&quot;unclassified&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;maxspeed&quot;</span><span class="p">:</span> <span class="n">resolved_speed</span><span class="p">,</span>
+        <span class="s2">&quot;reg&quot;</span><span class="p">:</span> <span class="n">reg</span><span class="p">,</span>
+        <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="c1"># &#39;is_exit&#39;: &#39;RECOUNT&#39;,</span>
+        <span class="s2">&quot;node_start&quot;</span><span class="p">:</span> <span class="n">start</span>
+        <span class="k">if</span> <span class="n">start</span>
+        <span class="k">else</span> <span class="n">find_end_node</span><span class="p">(</span><span class="n">edge_geom</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nodes_gdf</span><span class="p">,</span> <span class="n">local_crs</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">nodeID</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">&quot;node_end&quot;</span><span class="p">:</span> <span class="n">end</span> <span class="k">if</span> <span class="n">end</span> <span class="k">else</span> <span class="n">find_end_node</span><span class="p">(</span><span class="n">edge_geom</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nodes_gdf</span><span class="p">,</span> <span class="n">local_crs</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">nodeID</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">&quot;flag&quot;</span><span class="p">:</span> <span class="n">flag</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">([</span><span class="n">edge_data</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bidirectional</span><span class="p">:</span>
+        <span class="n">reverse_data</span> <span class="o">=</span> <span class="n">make_edge_data</span><span class="p">(</span>
+            <span class="n">edge_geom</span><span class="o">.</span><span class="n">reverse</span><span class="p">(),</span> <span class="n">maxspeed</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span> <span class="n">local_crs</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">nodes_gdf</span><span class="p">,</span> <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="n">flag</span>
+        <span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">gdf</span><span class="p">,</span> <span class="n">reverse_data</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">gdf</span></div>
+
+
+<div class="viewcode-block" id="make_node_data"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.make_node_data">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">make_node_data</span><span class="p">(</span>
+    <span class="n">point</span><span class="p">:</span> <span class="n">Point</span><span class="p">,</span> <span class="n">local_crs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">reg_1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reg_2</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersection&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a GeoDataFrame with node data based on geometry and other attributes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        point (Point): The geometry of the node.</span>
+<span class="sd">        local_crs (str): The coordinate reference system.</span>
+<span class="sd">        reg_1 (bool, optional): Indicator for region 1. Defaults to False.</span>
+<span class="sd">        reg_2 (bool, optional): Indicator for region 2. Defaults to False.</span>
+<span class="sd">        exit (str, optional): Exit status. Defaults to &#39;RECOUNT&#39;.</span>
+<span class="sd">        exit_country (str, optional): Exit country. Defaults to &#39;RECOUNT&#39;.</span>
+<span class="sd">        flag (str, optional): Additional information for the node. Defaults to &#39;intersection&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gpd.GeoDataFrame: A GeoDataFrame containing the node data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">node_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;reg_1&quot;</span><span class="p">:</span> <span class="n">reg_1</span><span class="p">,</span>
+        <span class="s2">&quot;reg_2&quot;</span><span class="p">:</span> <span class="n">reg_2</span><span class="p">,</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+        <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+        <span class="s2">&quot;nodeID&quot;</span><span class="p">:</span> <span class="n">create_nodeID</span><span class="p">(),</span>
+        <span class="c1"># &#39;exit&#39;: exit,</span>
+        <span class="c1"># &#39;exit_country&#39;: exit_country, #POLINA</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">point</span><span class="p">,</span>
+        <span class="s2">&quot;flag&quot;</span><span class="p">:</span> <span class="n">flag</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">([</span><span class="n">node_data</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gdf</span></div>
+
+
+<div class="viewcode-block" id="find_end_node"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.find_end_node">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">find_end_node</span><span class="p">(</span><span class="n">end</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">nodes_gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">local_crs</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the node corresponding to a LineString end using the nearest node.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        end (tuple): The coordinates of the end point.</span>
+<span class="sd">        nodes_gdf (gpd.GeoDataFrame): GeoDataFrame containing nodes.</span>
+<span class="sd">        local_crs (int): The coordinate reference system.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gpd.GeoDataFrame: The nearest node as a GeoDataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">end_point</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">end</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="n">nearest_points</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span><span class="n">nodes_gdf</span><span class="p">,</span> <span class="n">end_point</span><span class="p">,</span> <span class="n">distance_col</span><span class="o">=</span><span class="s2">&quot;dist&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">nearest_points</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="n">nearest_points</span><span class="p">[</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()]]</span></div>
+
+
+<div class="viewcode-block" id="connect_line_to_roads"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.connect_line_to_roads">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">connect_line_to_roads</span><span class="p">(</span>
+    <span class="n">each_line</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">,</span>
+    <span class="n">nodes_gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">edges_gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">node_buffer</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">edge_buffer</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">local_crs</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect a line to nearby roads by adding nodes and edges as needed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        each_line (gpd.GeoSeries): The line to connect.</span>
+<span class="sd">        nodes_gdf (gpd.GeoDataFrame): GeoDataFrame containing existing nodes.</span>
+<span class="sd">        edges_gdf (gpd.GeoDataFrame): GeoDataFrame containing existing edges.</span>
+<span class="sd">        node_buffer (float): Buffer distance to search for existing nodes.</span>
+<span class="sd">        edge_buffer (float): Buffer distance to search for existing edges.</span>
+<span class="sd">        local_crs (int): The coordinate reference system.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing GeoDataFrames of added nodes, added edges, a list of deleted edges, and a list of deleted edge ends.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">added_nodes</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">nodes_gdf</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="n">added_edges</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">edges_gdf</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="n">del_list_ends</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">del_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># global node_id</span>
+    <span class="k">for</span> <span class="n">end</span> <span class="ow">in</span> <span class="p">[</span><span class="n">each_line</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">each_line</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]:</span>
+        <span class="n">new_end_node</span> <span class="o">=</span> <span class="n">make_node_data</span><span class="p">(</span>
+            <span class="n">Point</span><span class="p">(</span><span class="n">end</span><span class="p">),</span>
+            <span class="n">local_crs</span><span class="p">,</span>
+            <span class="n">reg_1</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">each_line</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">reg_2</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">each_line</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">added_nodes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_nodes</span><span class="p">,</span> <span class="n">new_end_node</span><span class="p">])</span>  <span class="c1"># adding ends</span>
+
+        <span class="n">nearest_node</span> <span class="o">=</span> <span class="n">find_nearest_node</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">end</span><span class="p">),</span> <span class="n">nodes_gdf</span><span class="p">,</span> <span class="n">node_buffer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nearest_node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bridge</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([</span><span class="n">end</span><span class="p">,</span> <span class="n">nearest_node</span><span class="o">.</span><span class="n">geometry</span><span class="p">])</span>
+            <span class="n">bridge_edge</span> <span class="o">=</span> <span class="n">make_edge_data</span><span class="p">(</span>
+                <span class="n">bridge</span><span class="p">,</span>
+                <span class="n">each_line</span><span class="p">[</span><span class="s2">&quot;maxspeed&quot;</span><span class="p">],</span>
+                <span class="n">each_line</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">],</span>
+                <span class="n">local_crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">,</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">new_end_node</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">end</span><span class="o">=</span><span class="n">nearest_node</span><span class="o">.</span><span class="n">nodeID</span><span class="p">,</span>
+                <span class="n">flag</span><span class="o">=</span><span class="s2">&quot;bridge&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">added_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">added_edges</span><span class="p">,</span> <span class="n">bridge_edge</span><span class="p">]</span>
+            <span class="p">)</span>  <span class="c1"># if we can connect end to a node, only the bridge is added</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># if there is no node nearby</span>
+            <span class="n">nearest_roads</span><span class="p">,</span> <span class="n">nearest_point_on_road</span> <span class="o">=</span> <span class="n">find_nearest_road_point</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">end</span><span class="p">),</span> <span class="n">edges_gdf</span><span class="p">,</span> <span class="n">edge_buffer</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nearest_roads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">bridge_connector_node</span> <span class="o">=</span> <span class="n">make_node_data</span><span class="p">(</span>
+                    <span class="n">nearest_point_on_road</span><span class="p">,</span>
+                    <span class="n">local_crs</span><span class="p">,</span>
+                    <span class="n">reg_1</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">nearest_roads</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">reg_2</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="mi">2</span> <span class="ow">in</span> <span class="n">nearest_roads</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="c1"># exit=False,</span>
+                    <span class="c1"># exit_country=False</span>
+                <span class="p">)</span>
+                <span class="n">added_nodes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_nodes</span><span class="p">,</span> <span class="n">bridge_connector_node</span><span class="p">])</span>  <span class="c1"># adding bridge connector node</span>
+                <span class="n">reg</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">nearest_roads</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">())</span>
+                <span class="n">speeds</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mi">110</span> <span class="o">/</span> <span class="mf">3.6</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">90</span> <span class="o">/</span> <span class="mf">3.6</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">60</span> <span class="o">/</span> <span class="mf">3.6</span><span class="p">}</span>
+                <span class="n">bridge_edge</span> <span class="o">=</span> <span class="n">make_edge_data</span><span class="p">(</span>
+                    <span class="n">LineString</span><span class="p">([</span><span class="n">end</span><span class="p">,</span> <span class="n">nearest_point_on_road</span><span class="p">]),</span>
+                    <span class="n">maxspeed</span><span class="o">=</span><span class="n">speeds</span><span class="p">[</span><span class="n">reg</span><span class="p">],</span>
+                    <span class="n">reg</span><span class="o">=</span><span class="n">reg</span><span class="p">,</span>
+                    <span class="n">local_crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">,</span>
+                    <span class="n">start</span><span class="o">=</span><span class="n">new_end_node</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">end</span><span class="o">=</span><span class="n">bridge_connector_node</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">flag</span><span class="o">=</span><span class="s2">&quot;bridge&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">added_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_edges</span><span class="p">,</span> <span class="n">bridge_edge</span><span class="p">])</span>  <span class="c1"># adding bridge</span>
+
+                <span class="c1"># splitting the road</span>
+                <span class="n">intersections</span> <span class="o">=</span> <span class="n">nearest_roads</span><span class="p">[</span><span class="n">nearest_roads</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">nearest_point_on_road</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.001</span><span class="p">))]</span>  <span class="c1"># POLINA</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">intersections</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                    <span class="n">split_geometries</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span>
+                        <span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">nearest_point_on_road</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+                    <span class="p">)</span>  <span class="c1"># POLINA CHECK THE OUTPUT OF SPLITTING</span>
+                    <span class="n">split_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">geom</span> <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">split_geometries</span><span class="o">.</span><span class="n">geoms</span><span class="p">]</span>
+                    <span class="n">first_geom</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([</span><span class="o">*</span><span class="n">split_lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="o">*</span><span class="n">split_lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
+                    <span class="n">first_piece</span> <span class="o">=</span> <span class="n">make_edge_data</span><span class="p">(</span>
+                        <span class="n">first_geom</span><span class="p">,</span>
+                        <span class="n">row</span><span class="o">.</span><span class="n">maxspeed</span><span class="p">,</span>
+                        <span class="n">row</span><span class="o">.</span><span class="n">reg</span><span class="p">,</span>
+                        <span class="n">local_crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">,</span>
+                        <span class="n">start</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">node_start</span><span class="p">,</span>
+                        <span class="n">end</span><span class="o">=</span><span class="n">bridge_connector_node</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">flag</span><span class="o">=</span><span class="s2">&quot;road_segment&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">second_geom</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([</span><span class="o">*</span><span class="n">split_lines</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">])</span>
+                        <span class="n">second_piece</span> <span class="o">=</span> <span class="n">make_edge_data</span><span class="p">(</span>
+                            <span class="n">second_geom</span><span class="p">,</span>
+                            <span class="n">row</span><span class="o">.</span><span class="n">maxspeed</span><span class="p">,</span>
+                            <span class="n">row</span><span class="o">.</span><span class="n">reg</span><span class="p">,</span>
+                            <span class="n">local_crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">,</span>
+                            <span class="n">start</span><span class="o">=</span><span class="n">bridge_connector_node</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">end</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">node_end</span><span class="p">,</span>
+                            <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">flag</span><span class="o">=</span><span class="s2">&quot;road_segment&quot;</span><span class="p">,</span>
+                        <span class="p">)</span>
+
+                        <span class="n">added_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_edges</span><span class="p">,</span> <span class="n">first_piece</span><span class="p">,</span> <span class="n">second_piece</span><span class="p">])</span>  <span class="c1"># adding road pieces</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">added_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_edges</span><span class="p">,</span> <span class="n">first_piece</span><span class="p">])</span>  <span class="c1"># adding road pieces</span>
+
+                <span class="n">del_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">intersections</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_list</span><span class="p">())</span>
+                <span class="n">del_list_ends</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">intersections</span><span class="p">[</span><span class="s2">&quot;node_start&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span> <span class="n">intersections</span><span class="p">[</span><span class="s2">&quot;node_end&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()))</span>
+                <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">added_nodes</span><span class="p">,</span> <span class="n">added_edges</span><span class="p">,</span> <span class="n">del_list</span><span class="p">,</span> <span class="n">del_list_ends</span></div>
+
+
+<div class="viewcode-block" id="split_roads"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.split_roads">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">split_roads</span><span class="p">(</span>
+    <span class="n">each_line</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">intermediate_nodes</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">intermediate_edges</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">local_crs</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits roads at intersection points and adds nodes and edges for new road segments.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        each_line (gpd.GeoDataFrame): The new road geometry being processed.</span>
+<span class="sd">        intermediate_nodes (gpd.GeoDataFrame): GeoDataFrame of nodes for the existing road network.</span>
+<span class="sd">        intermediate_edges (gpd.GeoDataFrame): GeoDataFrame of edges for the existing road network.</span>
+<span class="sd">        local_crs (str): Coordinate reference system for spatial data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing:</span>
+<span class="sd">            - added_intersections_nodes (gpd.GeoDataFrame): GeoDataFrame of new intersection nodes.</span>
+<span class="sd">            - added_intersections_edges (gpd.GeoDataFrame): GeoDataFrame of new road segments.</span>
+<span class="sd">            - del_list (list): List of indices of deleted roads.</span>
+<span class="sd">            - del_list_ends (list): List of node start-end pairs of deleted roads.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">del_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">del_list_ends</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">added_intersections_nodes</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">intermediate_nodes</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">added_intersections_edges</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">intermediate_edges</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">road_pieces</span> <span class="o">=</span> <span class="n">intermediate_edges</span><span class="p">[</span><span class="o">~</span><span class="n">intermediate_edges</span><span class="o">.</span><span class="n">flag</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">&quot;bridge&quot;</span><span class="p">])]</span>
+    <span class="n">intersected_roads</span> <span class="o">=</span> <span class="n">road_pieces</span><span class="p">[</span>
+        <span class="n">road_pieces</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">each_line</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="p">]</span>  <span class="c1"># find pieces of road that should be split</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">intersected_roads</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">intersection_points</span> <span class="o">=</span> <span class="n">each_line</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span>
+            <span class="n">unary_union</span><span class="p">(</span><span class="n">intersected_roads</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># points of intersections</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">intersection_points</span><span class="p">,</span> <span class="n">Point</span><span class="p">):</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">intersection_points</span>
+            <span class="n">regs</span> <span class="o">=</span> <span class="n">find_nearest_road_point</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">intersected_roads</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="n">each_line</span><span class="o">.</span><span class="n">reg</span><span class="p">]</span>
+            <span class="n">new_intersection</span> <span class="o">=</span> <span class="n">make_node_data</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">local_crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">,</span> <span class="n">reg_1</span><span class="o">=</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">,</span> <span class="n">reg_2</span><span class="o">=</span><span class="mi">2</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">)</span>
+            <span class="n">added_intersections_nodes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_intersections_nodes</span><span class="p">,</span> <span class="n">new_intersection</span><span class="p">])</span>  <span class="c1"># adding new no</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">intersection_points</span><span class="p">,</span> <span class="n">MultiPoint</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">intersection_points</span><span class="o">.</span><span class="n">geoms</span><span class="p">:</span>
+                <span class="n">regs</span> <span class="o">=</span> <span class="n">find_nearest_road_point</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">intersected_roads</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="n">each_line</span><span class="o">.</span><span class="n">reg</span><span class="p">]</span>
+                <span class="n">new_intersection</span> <span class="o">=</span> <span class="n">make_node_data</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">local_crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">,</span> <span class="n">reg_1</span><span class="o">=</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">,</span> <span class="n">reg_2</span><span class="o">=</span><span class="mi">2</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">)</span>
+                <span class="n">added_intersections_nodes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_intersections_nodes</span><span class="p">,</span> <span class="n">new_intersection</span><span class="p">])</span>  <span class="c1"># adding new nodes</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">road</span> <span class="ow">in</span> <span class="n">intersected_roads</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">piece</span> <span class="ow">in</span> <span class="n">split</span><span class="p">(</span><span class="n">road</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">each_line</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">geoms</span><span class="p">:</span>
+                <span class="k">global</span> <span class="n">ra</span>
+                <span class="n">ra</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">intermediate_nodes</span><span class="p">,</span> <span class="n">added_intersections_nodes</span><span class="p">])</span>
+                <span class="n">new_piece</span> <span class="o">=</span> <span class="n">make_edge_data</span><span class="p">(</span>
+                    <span class="n">piece</span><span class="p">,</span>
+                    <span class="n">road</span><span class="o">.</span><span class="n">maxspeed</span><span class="p">,</span>
+                    <span class="n">local_crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">,</span>
+                    <span class="n">reg</span><span class="o">=</span><span class="n">road</span><span class="o">.</span><span class="n">reg</span><span class="p">,</span>
+                    <span class="n">nodes_gdf</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">intermediate_nodes</span><span class="p">,</span> <span class="n">added_intersections_nodes</span><span class="p">]),</span>
+                    <span class="n">bidirectional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">flag</span><span class="o">=</span><span class="s2">&quot;road_segment&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">added_intersections_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_intersections_edges</span><span class="p">,</span> <span class="n">new_piece</span><span class="p">])</span>  <span class="c1"># adding road pieces</span>
+            <span class="n">del_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">intersected_roads</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">to_list</span><span class="p">())</span>
+            <span class="n">del_list_ends</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">intersected_roads</span><span class="p">[</span><span class="s2">&quot;node_start&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span> <span class="n">intersected_roads</span><span class="p">[</span><span class="s2">&quot;node_end&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()))</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">piece</span> <span class="ow">in</span> <span class="n">split</span><span class="p">(</span><span class="n">each_line</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">intersected_roads</span><span class="o">.</span><span class="n">geometry</span><span class="p">))</span><span class="o">.</span><span class="n">geoms</span><span class="p">:</span>
+            <span class="n">new_piece</span> <span class="o">=</span> <span class="n">make_edge_data</span><span class="p">(</span>
+                <span class="n">piece</span><span class="p">,</span>
+                <span class="n">each_line</span><span class="o">.</span><span class="n">maxspeed</span><span class="p">,</span>
+                <span class="n">local_crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">,</span>
+                <span class="n">reg</span><span class="o">=</span><span class="n">each_line</span><span class="o">.</span><span class="n">reg</span><span class="p">,</span>
+                <span class="n">nodes_gdf</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">intermediate_nodes</span><span class="p">,</span> <span class="n">added_intersections_nodes</span><span class="p">]),</span>
+                <span class="n">bidirectional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">flag</span><span class="o">=</span><span class="s2">&quot;line_segment&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">added_intersections_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">added_intersections_edges</span><span class="p">,</span> <span class="n">new_piece</span><span class="p">])</span>  <span class="c1"># adding line pieces</span>
+
+    <span class="k">return</span> <span class="n">added_intersections_nodes</span><span class="p">,</span> <span class="n">added_intersections_edges</span><span class="p">,</span> <span class="n">del_list</span><span class="p">,</span> <span class="n">del_list_ends</span></div>
+
+
+<div class="viewcode-block" id="modify_graph"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.modify_graph">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">modify_graph</span><span class="p">(</span>
+    <span class="n">citygraph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span> <span class="n">del_list_ends</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">nodes_to_add</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">edges_to_add</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Modifies the city graph by removing edges and adding new nodes and edges.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        citygraph (nx.MultiDiGraph): The existing city graph.</span>
+<span class="sd">        del_list_ends (list): List of node start-end pairs for edges to remove.</span>
+<span class="sd">        nodes_to_add (gpd.GeoDataFrame): GeoDataFrame of nodes to add to the graph.</span>
+<span class="sd">        edges_to_add (gpd.GeoDataFrame): GeoDataFrame of edges to add to the graph.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        nx.Graph: The modified city graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">citygraph</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">remove_edges_from</span><span class="p">(</span><span class="n">del_list_ends</span><span class="p">)</span>
+    <span class="n">to_add</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">nodes_to_add</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">nodeID</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()))</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+
+    <span class="n">to_add</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">edges_to_add</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">to_add</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">node_start</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">node_end</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()))</span>
+    <span class="n">graph</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">to_add</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">graph</span></div>
+
+
+<div class="viewcode-block" id="add_roads"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.road_adder.html#transport_frames.road_adder.add_roads">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">add_roads</span><span class="p">(</span>
+    <span class="n">citygraph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span>
+    <span class="n">line_gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">local_crs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">node_buffer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+    <span class="n">road_buffer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds new roads to the city graph by processing each line in the road GeoDataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        citygraph (nx.MultiDiGraph): The existing city graph.</span>
+<span class="sd">        line_gdf (gpd.GeoDataFrame): GeoDataFrame of the new road lines.</span>
+<span class="sd">        nodes_gdf (gpd.GeoDataFrame): GeoDataFrame of the existing road network nodes.</span>
+<span class="sd">        edges_gdf (gpd.GeoDataFrame): GeoDataFrame of the existing road network edges.</span>
+<span class="sd">        local_crs (int): Coordinate reference system for spatial data.</span>
+<span class="sd">        node_buffer (int): Buffer distance for finding nearby nodes. Defaults to 300.</span>
+<span class="sd">        road_buffer (int): Buffer distance for finding nearby roads. Defaults to 5000.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        nx.MultiDiGraph: The modified city graph with new roads, nodes, and edges.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">node_id</span>
+
+    <span class="n">nodes_gdf</span><span class="p">,</span> <span class="n">edges_gdf</span> <span class="o">=</span> <span class="n">momepy</span><span class="o">.</span><span class="n">nx_to_gdf</span><span class="p">(</span><span class="n">citygraph</span><span class="p">)</span>
+    <span class="n">line_gdf</span><span class="p">[</span><span class="s2">&quot;maxspeed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line_gdf</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">reg</span><span class="p">:</span> <span class="mi">110</span> <span class="o">/</span> <span class="mf">3.6</span> <span class="k">if</span> <span class="n">reg</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">90</span> <span class="o">/</span> <span class="mf">3.6</span> <span class="k">if</span> <span class="n">reg</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">60</span> <span class="o">/</span> <span class="mf">3.6</span> <span class="k">if</span> <span class="n">reg</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="p">)</span>
+
+    <span class="n">node_id</span> <span class="o">=</span> <span class="n">nodes_gdf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">nodes_to_add</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">nodes_gdf</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="n">edges_to_add</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">edges_gdf</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="n">del_list_ends</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">each_line</span> <span class="ow">in</span> <span class="n">line_gdf</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">added_nodes</span><span class="p">,</span> <span class="n">added_edges</span><span class="p">,</span> <span class="n">del_list</span><span class="p">,</span> <span class="n">del_list_ends1</span> <span class="o">=</span> <span class="n">connect_line_to_roads</span><span class="p">(</span>
+            <span class="n">each_line</span><span class="p">,</span> <span class="n">nodes_gdf</span><span class="p">,</span> <span class="n">edges_gdf</span><span class="p">,</span> <span class="n">node_buffer</span><span class="p">,</span> <span class="n">road_buffer</span><span class="p">,</span> <span class="n">local_crs</span>
+        <span class="p">)</span>
+        <span class="n">intermediate_nodes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">nodes_gdf</span><span class="p">,</span> <span class="n">added_nodes</span><span class="p">])</span>
+        <span class="n">intermediate_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">edges_gdf</span><span class="p">,</span> <span class="n">added_edges</span><span class="p">])</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">del_list</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="n">added_intersections_nodes</span><span class="p">,</span> <span class="n">added_intersections_edges</span><span class="p">,</span> <span class="n">del_list</span><span class="p">,</span> <span class="n">del_list_ends2</span> <span class="o">=</span> <span class="n">split_roads</span><span class="p">(</span>
+            <span class="n">each_line</span><span class="p">,</span> <span class="n">intermediate_nodes</span><span class="p">,</span> <span class="n">intermediate_edges</span><span class="p">,</span> <span class="n">local_crs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">added_edges</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">added_intersections_edges</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;not connected&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nodes_to_add</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">nodes_to_add</span><span class="p">,</span> <span class="n">added_nodes</span><span class="p">,</span> <span class="n">added_intersections_nodes</span><span class="p">])</span>
+            <span class="n">edges_to_add</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">edges_to_add</span><span class="p">,</span> <span class="n">added_edges</span><span class="p">,</span> <span class="n">added_intersections_edges</span><span class="p">])</span>
+            <span class="n">del_list_ends</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">del_list_ends1</span> <span class="o">+</span> <span class="n">del_list_ends2</span><span class="p">)</span>
+
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">modify_graph</span><span class="p">(</span><span class="n">citygraph</span><span class="p">,</span> <span class="n">del_list_ends1</span> <span class="o">+</span> <span class="n">del_list_ends2</span><span class="p">,</span> <span class="n">nodes_to_add</span><span class="p">,</span> <span class="n">edges_to_add</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">graph</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

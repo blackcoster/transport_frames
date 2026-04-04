@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.road_adder &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="transport_frames.indicators" href="transport_frames.indicators.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.graph.html">transport_frames.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.frame.html">transport_frames.frame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.criteria.html">transport_frames.criteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.indicators.html">transport_frames.indicators</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">transport_frames.road_adder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder._resolve_maxspeed"><code class="docutils literal notranslate"><span class="pre">_resolve_maxspeed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.create_nodeID"><code class="docutils literal notranslate"><span class="pre">create_nodeID()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.find_nearest_node"><code class="docutils literal notranslate"><span class="pre">find_nearest_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.find_nearest_road_point"><code class="docutils literal notranslate"><span class="pre">find_nearest_road_point()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.make_edge_data"><code class="docutils literal notranslate"><span class="pre">make_edge_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.make_node_data"><code class="docutils literal notranslate"><span class="pre">make_node_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.find_end_node"><code class="docutils literal notranslate"><span class="pre">find_end_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.connect_line_to_roads"><code class="docutils literal notranslate"><span class="pre">connect_line_to_roads()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.split_roads"><code class="docutils literal notranslate"><span class="pre">split_roads()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.modify_graph"><code class="docutils literal notranslate"><span class="pre">modify_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.road_adder.add_roads"><code class="docutils literal notranslate"><span class="pre">add_roads()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API documentation</a></li>
+      <li class="breadcrumb-item active">transport_frames.road_adder</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/transport_frames.road_adder.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-transport_frames.road_adder">
+<span id="transport-frames-road-adder"></span><h1>transport_frames.road_adder<a class="headerlink" href="#module-transport_frames.road_adder" title="Permalink to this heading"></a></h1>
+<p>Module for adding new roads to the graph</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.road_adder.add_roads" title="transport_frames.road_adder.add_roads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_roads</span></code></a>(citygraph, line_gdf, local_crs[, ...])</p></td>
+<td><p>Adds new roads to the city graph by processing each line in the road GeoDataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.road_adder.connect_line_to_roads" title="transport_frames.road_adder.connect_line_to_roads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_line_to_roads</span></code></a>(each_line, nodes_gdf, ...)</p></td>
+<td><p>Connect a line to nearby roads by adding nodes and edges as needed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.road_adder.create_nodeID" title="transport_frames.road_adder.create_nodeID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_nodeID</span></code></a>()</p></td>
+<td><p>Generate a new unique node ID.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.road_adder.find_end_node" title="transport_frames.road_adder.find_end_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_end_node</span></code></a>(end, nodes_gdf, local_crs)</p></td>
+<td><p>Find the node corresponding to a LineString end using the nearest node.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.road_adder.find_nearest_node" title="transport_frames.road_adder.find_nearest_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_nearest_node</span></code></a>(point, nodes_gdf, node_buffer)</p></td>
+<td><p>Find the nearest node within a specified buffer distance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.road_adder.find_nearest_road_point" title="transport_frames.road_adder.find_nearest_road_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_nearest_road_point</span></code></a>(point, roads_gdf, ...)</p></td>
+<td><p>Find the nearest road and the closest point on that road within a specified buffer distance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.road_adder.make_edge_data" title="transport_frames.road_adder.make_edge_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_edge_data</span></code></a>(edge_geom, maxspeed, reg, ...)</p></td>
+<td><p>Create a GeoDataFrame with edge data based on geometry and other attributes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.road_adder.make_node_data" title="transport_frames.road_adder.make_node_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_node_data</span></code></a>(point, local_crs[, reg_1, ...])</p></td>
+<td><p>Create a GeoDataFrame with node data based on geometry and other attributes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.road_adder.modify_graph" title="transport_frames.road_adder.modify_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">modify_graph</span></code></a>(citygraph, del_list_ends, ...)</p></td>
+<td><p>Modifies the city graph by removing edges and adding new nodes and edges.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.road_adder.split_roads" title="transport_frames.road_adder.split_roads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_roads</span></code></a>(each_line, intermediate_nodes, ...)</p></td>
+<td><p>Splits roads at intersection points and adds nodes and edges for new road segments.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder._resolve_maxspeed">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">_resolve_maxspeed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxspeed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#_resolve_maxspeed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder._resolve_maxspeed" title="Permalink to this definition"></a></dt>
+<dd><p>Return a positive speed value for edge creation.</p>
+<p>If incoming <cite>maxspeed</cite> is missing or non-numeric, falls back to a default by <cite>reg</cite>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.create_nodeID">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">create_nodeID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#create_nodeID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.create_nodeID" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a new unique node ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The new node ID.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.find_nearest_node">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">find_nearest_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#find_nearest_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.find_nearest_node" title="Permalink to this definition"></a></dt>
+<dd><p>Find the nearest node within a specified buffer distance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<em>Point</em>) – The point to find the nearest node for.</p></li>
+<li><p><strong>nodes_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing nodes.</p></li>
+<li><p><strong>node_buffer</strong> (<em>float</em>) – The buffer distance within which to search for the nearest node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The ID of the nearest node, or None if no node is found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.find_nearest_road_point">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">find_nearest_road_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roads_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">road_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#find_nearest_road_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.find_nearest_road_point" title="Permalink to this definition"></a></dt>
+<dd><p>Find the nearest road and the closest point on that road within a specified buffer distance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<em>Point</em>) – The point to find the nearest road for.</p></li>
+<li><p><strong>roads_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing roads.</p></li>
+<li><p><strong>road_buffer</strong> (<em>float</em>) – The buffer distance within which to search for the nearest road.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the nearest roads GeoDataFrame and the nearest point on the road, or (None, None) if no road is found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.make_edge_data">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">make_edge_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LineString</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxspeed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#make_edge_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.make_edge_data" title="Permalink to this definition"></a></dt>
+<dd><p>Create a GeoDataFrame with edge data based on geometry and other attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_geom</strong> (<em>LineString</em>) – The geometry of the edge.</p></li>
+<li><p><strong>maxspeed</strong> (<em>float</em>) – The maximum speed on the edge.</p></li>
+<li><p><strong>reg</strong> (<em>int</em>) – The region identifier.</p></li>
+<li><p><strong>local_crs</strong> (<em>str</em>) – The coordinate reference system.</p></li>
+<li><p><strong>start</strong> (<em>int</em><em>, </em><em>optional</em>) – The starting node ID. Defaults to None.</p></li>
+<li><p><strong>end</strong> (<em>int</em><em>, </em><em>optional</em>) – The ending node ID. Defaults to None.</p></li>
+<li><p><strong>nodes_gdf</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame of nodes. Defaults to None.</p></li>
+<li><p><strong>bidirectional</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, creates a bidirectional edge. Defaults to True.</p></li>
+<li><p><strong>flag</strong> (<em>str</em><em>, </em><em>optional</em>) – Additional information for the edge. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A GeoDataFrame containing the edge data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.make_node_data">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">make_node_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg_2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'intersection'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#make_node_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.make_node_data" title="Permalink to this definition"></a></dt>
+<dd><p>Create a GeoDataFrame with node data based on geometry and other attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<em>Point</em>) – The geometry of the node.</p></li>
+<li><p><strong>local_crs</strong> (<em>str</em>) – The coordinate reference system.</p></li>
+<li><p><strong>reg_1</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicator for region 1. Defaults to False.</p></li>
+<li><p><strong>reg_2</strong> (<em>bool</em><em>, </em><em>optional</em>) – Indicator for region 2. Defaults to False.</p></li>
+<li><p><strong>exit</strong> (<em>str</em><em>, </em><em>optional</em>) – Exit status. Defaults to ‘RECOUNT’.</p></li>
+<li><p><strong>exit_country</strong> (<em>str</em><em>, </em><em>optional</em>) – Exit country. Defaults to ‘RECOUNT’.</p></li>
+<li><p><strong>flag</strong> (<em>str</em><em>, </em><em>optional</em>) – Additional information for the node. Defaults to ‘intersection’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A GeoDataFrame containing the node data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.find_end_node">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">find_end_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#find_end_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.find_end_node" title="Permalink to this definition"></a></dt>
+<dd><p>Find the node corresponding to a LineString end using the nearest node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>end</strong> (<em>tuple</em>) – The coordinates of the end point.</p></li>
+<li><p><strong>nodes_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing nodes.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em>) – The coordinate reference system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The nearest node as a GeoDataFrame.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.connect_line_to_roads">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">connect_line_to_roads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">each_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoSeries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#connect_line_to_roads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.connect_line_to_roads" title="Permalink to this definition"></a></dt>
+<dd><p>Connect a line to nearby roads by adding nodes and edges as needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>each_line</strong> (<em>gpd.GeoSeries</em>) – The line to connect.</p></li>
+<li><p><strong>nodes_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing existing nodes.</p></li>
+<li><p><strong>edges_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing existing edges.</p></li>
+<li><p><strong>node_buffer</strong> (<em>float</em>) – Buffer distance to search for existing nodes.</p></li>
+<li><p><strong>edge_buffer</strong> (<em>float</em>) – Buffer distance to search for existing edges.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em>) – The coordinate reference system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing GeoDataFrames of added nodes, added edges, a list of deleted edges, and a list of deleted edge ends.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.split_roads">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">split_roads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">each_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#split_roads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.split_roads" title="Permalink to this definition"></a></dt>
+<dd><p>Splits roads at intersection points and adds nodes and edges for new road segments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>each_line</strong> (<em>gpd.GeoDataFrame</em>) – The new road geometry being processed.</p></li>
+<li><p><strong>intermediate_nodes</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of nodes for the existing road network.</p></li>
+<li><p><strong>intermediate_edges</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of edges for the existing road network.</p></li>
+<li><p><strong>local_crs</strong> (<em>str</em>) – Coordinate reference system for spatial data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing:</dt><dd><ul class="simple">
+<li><p>added_intersections_nodes (gpd.GeoDataFrame): GeoDataFrame of new intersection nodes.</p></li>
+<li><p>added_intersections_edges (gpd.GeoDataFrame): GeoDataFrame of new road segments.</p></li>
+<li><p>del_list (list): List of indices of deleted roads.</p></li>
+<li><p>del_list_ends (list): List of node start-end pairs of deleted roads.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.modify_graph">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">modify_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">citygraph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">del_list_ends</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_to_add</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_to_add</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Graph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#modify_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.modify_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Modifies the city graph by removing edges and adding new nodes and edges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>citygraph</strong> (<em>nx.MultiDiGraph</em>) – The existing city graph.</p></li>
+<li><p><strong>del_list_ends</strong> (<em>list</em>) – List of node start-end pairs for edges to remove.</p></li>
+<li><p><strong>nodes_to_add</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of nodes to add to the graph.</p></li>
+<li><p><strong>edges_to_add</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of edges to add to the graph.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The modified city graph.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.Graph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.road_adder.add_roads">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.road_adder.</span></span><span class="sig-name descname"><span class="pre">add_roads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">citygraph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">road_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Graph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/road_adder.html#add_roads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.road_adder.add_roads" title="Permalink to this definition"></a></dt>
+<dd><p>Adds new roads to the city graph by processing each line in the road GeoDataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>citygraph</strong> (<em>nx.MultiDiGraph</em>) – The existing city graph.</p></li>
+<li><p><strong>line_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of the new road lines.</p></li>
+<li><p><strong>nodes_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of the existing road network nodes.</p></li>
+<li><p><strong>edges_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of the existing road network edges.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em>) – Coordinate reference system for spatial data.</p></li>
+<li><p><strong>node_buffer</strong> (<em>int</em>) – Buffer distance for finding nearby nodes. Defaults to 300.</p></li>
+<li><p><strong>road_buffer</strong> (<em>int</em>) – Buffer distance for finding nearby roads. Defaults to 5000.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The modified city graph with new roads, nodes, and edges.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="transport_frames.indicators.html" class="btn btn-neutral float-left" title="transport_frames.indicators" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

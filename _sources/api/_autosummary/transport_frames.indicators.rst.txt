@@ -1,0 +1,53 @@
+﻿transport\_frames.indicators
+============================
+
+.. automodule:: transport_frames.indicators
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      calculate_distances
+      get_bus_routes_num
+      get_connectivity
+      get_distance_from
+      get_distance_to_federal_roads
+      get_distance_to_region_admin_center
+      get_railway_length
+      get_reg_length
+      get_road_density
+      get_road_length
+      get_service_accessibility
+      get_service_count
+      get_terr_distance_to_region_admin_center
+      get_terr_nature_distance
+      get_terr_nearest_centers
+      get_terr_road_density
+      get_terr_service_accessibility
+      get_terr_service_count
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      PointSchema
+      PolygonSchema
+   
+   
+
+   
+   
+   
+
+
+

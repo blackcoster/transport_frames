@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.indicators &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="transport_frames.road_adder" href="transport_frames.road_adder.html" />
+    <link rel="prev" title="transport_frames.criteria" href="transport_frames.criteria.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.graph.html">transport_frames.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.frame.html">transport_frames.frame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.criteria.html">transport_frames.criteria</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">transport_frames.indicators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.PolygonSchema"><code class="docutils literal notranslate"><span class="pre">PolygonSchema</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.indicators.PolygonSchema.name"><code class="docutils literal notranslate"><span class="pre">PolygonSchema.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.indicators.PolygonSchema.Config"><code class="docutils literal notranslate"><span class="pre">PolygonSchema.Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.PointSchema"><code class="docutils literal notranslate"><span class="pre">PointSchema</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.indicators.PointSchema.Config"><code class="docutils literal notranslate"><span class="pre">PointSchema.Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.calculate_distances"><code class="docutils literal notranslate"><span class="pre">calculate_distances()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_distance_from"><code class="docutils literal notranslate"><span class="pre">get_distance_from()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_distance_to_region_admin_center"><code class="docutils literal notranslate"><span class="pre">get_distance_to_region_admin_center()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_distance_to_federal_roads"><code class="docutils literal notranslate"><span class="pre">get_distance_to_federal_roads()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_connectivity"><code class="docutils literal notranslate"><span class="pre">get_connectivity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_road_length"><code class="docutils literal notranslate"><span class="pre">get_road_length()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_road_density"><code class="docutils literal notranslate"><span class="pre">get_road_density()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_reg_length"><code class="docutils literal notranslate"><span class="pre">get_reg_length()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_service_count"><code class="docutils literal notranslate"><span class="pre">get_service_count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_service_accessibility"><code class="docutils literal notranslate"><span class="pre">get_service_accessibility()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_bus_routes_num"><code class="docutils literal notranslate"><span class="pre">get_bus_routes_num()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_railway_length"><code class="docutils literal notranslate"><span class="pre">get_railway_length()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_terr_service_accessibility"><code class="docutils literal notranslate"><span class="pre">get_terr_service_accessibility()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_terr_service_count"><code class="docutils literal notranslate"><span class="pre">get_terr_service_count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_terr_road_density"><code class="docutils literal notranslate"><span class="pre">get_terr_road_density()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_terr_distance_to_region_admin_center"><code class="docutils literal notranslate"><span class="pre">get_terr_distance_to_region_admin_center()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_terr_nature_distance"><code class="docutils literal notranslate"><span class="pre">get_terr_nature_distance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.indicators.get_terr_nearest_centers"><code class="docutils literal notranslate"><span class="pre">get_terr_nearest_centers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.road_adder.html">transport_frames.road_adder</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API documentation</a></li>
+      <li class="breadcrumb-item active">transport_frames.indicators</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/transport_frames.indicators.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-transport_frames.indicators">
+<span id="transport-frames-indicators"></span><h1>transport_frames.indicators<a class="headerlink" href="#module-transport_frames.indicators" title="Permalink to this heading"></a></h1>
+<p>Module for getting area and territory indicators</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.calculate_distances" title="transport_frames.indicators.calculate_distances"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_distances</span></code></a>(from_gdf, to_gdf, graph)</p></td>
+<td><p>Compute the minimum distances from each point in the origin GeoDataFrame to the nearest point in the destination GeoDataFrame using the road network graph.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_bus_routes_num" title="transport_frames.indicators.get_bus_routes_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bus_routes_num</span></code></a>(area_polygons[, ...])</p></td>
+<td><p>Calculate the number of unique bus routes intersecting each area polygon.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.get_connectivity" title="transport_frames.indicators.get_connectivity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_connectivity</span></code></a>(settlement_points, ...[, ...])</p></td>
+<td><p>Calculate connectivity scores for each area polygon based on settlement points and a transport network.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_distance_from" title="transport_frames.indicators.get_distance_from"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_distance_from</span></code></a>(point, settlement_points, ...)</p></td>
+<td><p>Calculate the median distance from settlement points to a reference point within specified area polygons.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.get_distance_to_federal_roads" title="transport_frames.indicators.get_distance_to_federal_roads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_distance_to_federal_roads</span></code></a>(...)</p></td>
+<td><p>Compute the median distance from settlements to federal roads for each area polygon.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_distance_to_region_admin_center" title="transport_frames.indicators.get_distance_to_region_admin_center"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_distance_to_region_admin_center</span></code></a>(...)</p></td>
+<td><p>Compute the median distance from settlements to the regional administrative center for each area polygon.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.get_railway_length" title="transport_frames.indicators.get_railway_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_railway_length</span></code></a>(railway_paths, ...)</p></td>
+<td><p>Calculate the total railway length within each area polygon.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_reg_length" title="transport_frames.indicators.get_reg_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_reg_length</span></code></a>(graph, area_polygons)</p></td>
+<td><p>Compute the total length of roads by regional classification within each area polygon.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.get_road_density" title="transport_frames.indicators.get_road_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_road_density</span></code></a>(graph, area_polygons)</p></td>
+<td><p>Compute road density for each area polygon.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_road_length" title="transport_frames.indicators.get_road_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_road_length</span></code></a>(graph, area_polygons)</p></td>
+<td><p>Calculate the total road length within each area polygon.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.get_service_accessibility" title="transport_frames.indicators.get_service_accessibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_service_accessibility</span></code></a>(settlement_points, ...)</p></td>
+<td><p>Compute the median accessibility time from settlements to transport services within each area polygon.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_service_count" title="transport_frames.indicators.get_service_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_service_count</span></code></a>(area_polygons, service)</p></td>
+<td><p>Count the number of service points located within each area polygon.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.get_terr_distance_to_region_admin_center" title="transport_frames.indicators.get_terr_distance_to_region_admin_center"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_terr_distance_to_region_admin_center</span></code></a>(...)</p></td>
+<td><p>Compute the median distance from a territory center to the regional administrative center.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_terr_nature_distance" title="transport_frames.indicators.get_terr_nature_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_terr_nature_distance</span></code></a>(territory, ...[, ...])</p></td>
+<td><p>Compute the number of nature objects within a territory and the distance to the nearest one.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.get_terr_nearest_centers" title="transport_frames.indicators.get_terr_nearest_centers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_terr_nearest_centers</span></code></a>(territory, graph[, ...])</p></td>
+<td><p>Compute distances from a territory to the nearest district and settlement centers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_terr_road_density" title="transport_frames.indicators.get_terr_road_density"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_terr_road_density</span></code></a>(graph, territory_polygon)</p></td>
+<td><p>Compute the road density within a given territory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.get_terr_service_accessibility" title="transport_frames.indicators.get_terr_service_accessibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_terr_service_accessibility</span></code></a>(graph, ...)</p></td>
+<td><p>Compute service accessibility indicators for a given territory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.get_terr_service_count" title="transport_frames.indicators.get_terr_service_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_terr_service_count</span></code></a>(territory_polygon, ...)</p></td>
+<td><p>Count the number of service points within a given territory, considering a 3 km buffer.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.indicators.PointSchema" title="transport_frames.indicators.PointSchema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSchema</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Schema for validating points.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.indicators.PolygonSchema" title="transport_frames.indicators.PolygonSchema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PolygonSchema</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Schema for validating polygons.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.indicators.PolygonSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">PolygonSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#PolygonSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.PolygonSchema" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code></p>
+<p>Schema for validating polygons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_geom_types</strong> (<em>list</em>) – List of allowed geometry types for the blocks, default is [shapely.Polygon]</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.indicators.PolygonSchema.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Series</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'name'</span></em><a class="headerlink" href="#transport_frames.indicators.PolygonSchema.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.indicators.PolygonSchema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#transport_frames.indicators.PolygonSchema.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.indicators.PolygonSchema.Config.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PolygonSchema'</span></em><a class="headerlink" href="#transport_frames.indicators.PolygonSchema.Config.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.indicators.PointSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">PointSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#PointSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.PointSchema" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code></p>
+<p>Schema for validating points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_geom_types</strong> (<em>list</em>) – List of allowed geometry types for the points, default is [shapely.Point]</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.indicators.PointSchema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#transport_frames.indicators.PointSchema.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.indicators.PointSchema.Config.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PointSchema'</span></em><a class="headerlink" href="#transport_frames.indicators.PointSchema.Config.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.calculate_distances">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">calculate_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">from_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'length_meter'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_div</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#calculate_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.calculate_distances" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the minimum distances from each point in the origin GeoDataFrame to the nearest
+point in the destination GeoDataFrame using the road network graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>from_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing origin points.</p></li>
+<li><p><strong>to_gdf</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing destination points.</p></li>
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – Road network graph representing transport connections.</p></li>
+<li><p><strong>weight</strong> (<em>str</em><em>, </em><em>optional</em>) – Edge attribute used for distance calculation (default is “length_meter”).</p></li>
+<li><p><strong>unit_div</strong> (<em>int</em><em>, </em><em>optional</em>) – Factor to convert distance into desired units (default is 1000 for km).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Series containing the minimum distances in the specified units.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_distance_from">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_distance_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settlement_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_distance_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_distance_from" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the median distance from settlement points to a reference point within specified area polygons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing the reference point to measure distances from.</p></li>
+<li><p><strong>settlement_points</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing settlement points.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame representing area polygons.</p></li>
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – Transport network graph.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em>) – Coordinate reference system (CRS) to use.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>GeoDataFrame with median distances to the reference point for each area polygon.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_distance_to_region_admin_center">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_distance_to_region_admin_center</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region_admin_center</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settlement_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_distance_to_region_admin_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_distance_to_region_admin_center" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the median distance from settlements to the regional administrative center for each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>region_admin_center</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing the regional administrative center point.</p></li>
+<li><p><strong>settlement_points</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing settlement points.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame representing the area polygons.</p></li>
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – Transport network graph.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated area polygons with a new column for median distances to the regional administrative center.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_distance_to_federal_roads">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_distance_to_federal_roads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settlement_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_distance_to_federal_roads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_distance_to_federal_roads" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the median distance from settlements to federal roads for each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>settlement_points</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing settlement points.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame representing the area polygons.</p></li>
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – Transport network graph.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated area polygons with a new column for median distances to federal roads.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_connectivity">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_connectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settlement_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj_mx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_connectivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_connectivity" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate connectivity scores for each area polygon based on settlement points and a transport network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>settlement_points</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing settlement points.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame representing area polygons.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em>) – Coordinate reference system (CRS) to use.</p></li>
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em><em>, </em><em>optional</em>) – Transport network graph (required if adjacency matrix is not provided).</p></li>
+<li><p><strong>adj_mx</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – Precomputed adjacency matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Area polygons with computed connectivity values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_road_length">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_road_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_road_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_road_length" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the total road length within each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – Transport network graph.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame representing area polygons.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Area polygons with an additional column indicating the total road length (in kilometers).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_road_density">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_road_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_road_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_road_density" title="Permalink to this definition"></a></dt>
+<dd><p>Compute road density for each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – Transport network graph.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame representing area polygons.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Area polygons with calculated road density (road length per unit area).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_reg_length">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_reg_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_reg_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_reg_length" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the total length of roads by regional classification within each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – The transport network graph.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – The polygons representing the areas of interest.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated area polygons with additional columns for road length by regional classification.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_service_count">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_service_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_service_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_service_count" title="Permalink to this definition"></a></dt>
+<dd><p>Count the number of service points located within each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – The polygons representing areas of interest.</p></li>
+<li><p><strong>service</strong> (<em>gpd.GeoDataFrame</em>) – The GeoDataFrame containing service points.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Area polygons with an added column for the number of services.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_service_accessibility">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_service_accessibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settlement_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_service_accessibility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_service_accessibility" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the median accessibility time from settlements to transport services within each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>settlement_points</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing settlement points.</p></li>
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – The transport network graph.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – The polygons representing areas of interest.</p></li>
+<li><p><strong>service</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of transport service points.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Area polygons with computed median accessibility times for each service.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_bus_routes_num">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_bus_routes_num</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bus_edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">public_transport_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_bus_routes_num"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_bus_routes_num" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the number of unique bus routes intersecting each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – The polygons representing areas of interest.</p></li>
+<li><p><strong>bus_edges</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame containing bus network edges with route attributes.</p></li>
+<li><p><strong>public_transport_graph</strong> (<em>nx.MultiDiGraph</em><em>, </em><em>optional</em>) – The public transport graph.</p></li>
+<li><p><strong>polygon_gdf</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – A polygon GeoDataFrame used to extract the public transport graph.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Area polygons with an additional column indicating the number of unique bus routes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_railway_length">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_railway_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">railway_paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_railway_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_railway_length" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the total railway length within each area polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>railway_paths</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing railway path geometries.</p></li>
+<li><p><strong>area_polygons</strong> (<em>gpd.GeoDataFrame</em>) – The polygons representing areas of interest.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em>) – The coordinate reference system to use.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Area polygons with an added column indicating the railway length (in kilometers).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_terr_service_accessibility">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_terr_service_accessibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">territory_polygon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_terr_service_accessibility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_terr_service_accessibility" title="Permalink to this definition"></a></dt>
+<dd><p>Compute service accessibility indicators for a given territory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – The transport network graph.</p></li>
+<li><p><strong>territory_polygon</strong> (<em>gpd.GeoDataFrame</em>) – Polygon representing the territory of interest.</p></li>
+<li><p><strong>service</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing service points.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated territory polygons with:
+- ‘number_of_service’: Count of services inside.
+- ‘service_accessibility’: Travel time to the nearest service.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_terr_service_count">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_terr_service_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">territory_polygon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">service</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3856</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_terr_service_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_terr_service_count" title="Permalink to this definition"></a></dt>
+<dd><p>Count the number of service points within a given territory, considering a 3 km buffer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>territory_polygon</strong> (<em>gpd.GeoDataFrame</em>) – The polygon(s) representing areas of interest.</p></li>
+<li><p><strong>service</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing service points.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em><em>, </em><em>optional</em>) – The coordinate reference system (default is 3856).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Territory polygons with an added column indicating the number of services.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_terr_road_density">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_terr_road_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">territory_polygon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_terr_road_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_terr_road_density" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the road density within a given territory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – The transport network graph.</p></li>
+<li><p><strong>territory_polygon</strong> (<em>gpd.GeoDataFrame</em>) – The polygon(s) representing the territory.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Territory polygons with an added column for road density.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_terr_distance_to_region_admin_center">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_terr_distance_to_region_admin_center</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region_admin_center</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">territory_polygon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_terr_distance_to_region_admin_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_terr_distance_to_region_admin_center" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the median distance from a territory center to the regional administrative center.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>region_admin_center</strong> (<em>gpd.GeoDataFrame</em>) – The regional administrative center point.</p></li>
+<li><p><strong>territory_polygon</strong> (<em>gpd.GeoDataFrame</em>) – The polygons representing the territory.</p></li>
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – The transport network graph.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated territory polygons with a new column for the median distance to the regional admin center.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_terr_nature_distance">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_terr_nature_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">territory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nature_objects</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3857</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_terr_nature_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_terr_nature_distance" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the number of nature objects within a territory and the distance to the nearest one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>territory</strong> (<em>gpd.GeoDataFrame</em>) – The area polygons where nature accessibility is calculated.</p></li>
+<li><p><strong>nature_objects</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing nature objects (e.g., parks, reserves).</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em><em>, </em><em>optional</em>) – The coordinate reference system (default is 3857).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated <cite>territory</cite> with:
+- ‘number_of_objects’: Count of nature objects within.
+- ‘objects_accessibility’: Distance to the nearest nature object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.indicators.get_terr_nearest_centers">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.indicators.</span></span><span class="sig-name descname"><span class="pre">get_terr_nearest_centers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">territory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">districts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3857</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/indicators.html#get_terr_nearest_centers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.indicators.get_terr_nearest_centers" title="Permalink to this definition"></a></dt>
+<dd><p>Compute distances from a territory to the nearest district and settlement centers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>territory</strong> (<em>gpd.GeoDataFrame</em>) – The polygons representing the territory.</p></li>
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – The transport network graph.</p></li>
+<li><p><strong>districts</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame of district boundaries.</p></li>
+<li><p><strong>centers_points</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame containing district/settlement centers.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em><em>, </em><em>optional</em>) – The coordinate reference system (default is 3857).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated territory polygons with:
+- ‘to_nearest_district_center_km’: Distance to the nearest district center.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="transport_frames.criteria.html" class="btn btn-neutral float-left" title="transport_frames.criteria" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="transport_frames.road_adder.html" class="btn btn-neutral float-right" title="transport_frames.road_adder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

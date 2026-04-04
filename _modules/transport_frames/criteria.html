@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.criteria &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">transport_frames.criteria</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for transport_frames.criteria</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module for getting grade and criteroa of territories &quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">momepy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandera</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandera.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Series</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">TqdmWarning</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iduedu</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_adj_matrix_gdf_to_gdf</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">transport_frames.utils.helper_funcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSchema</span>
+
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">TqdmWarning</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PolygonSchema"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.PolygonSchema">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PolygonSchema</span><span class="p">(</span><span class="n">BaseSchema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schema for validating polygons.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name pf the polygon. Default to None</span>
+<span class="sd">    _geom_types : list</span>
+<span class="sd">        List of allowed geometry types for the points, default is [shapely.Point]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Series</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">_geom_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="PointSchema"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.PointSchema">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PointSchema</span><span class="p">(</span><span class="n">BaseSchema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schema for validating points.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    _geom_types : list</span>
+<span class="sd">        List of allowed geometry types for the points, default is [shapely.Point]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_geom_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="grade_territory"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.grade_territory">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">grade_territory</span><span class="p">(</span>
+    <span class="n">frame</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span> <span class="n">gdf_poly</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">include_priority</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Grade territories based on proximity to key transport infrastructure.</span>
+
+<span class="sd">    This function evaluates territories by computing distances to major road </span>
+<span class="sd">    networks (reg1, reg2), edges, and priority roads. The grading system assigns </span>
+<span class="sd">    scores based on proximity thresholds.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    frame : nx.MultiDiGraph</span>
+<span class="sd">        The transport network graph containing road connections.</span>
+<span class="sd">    gdf_poly : gpd.GeoDataFrame</span>
+<span class="sd">        A GeoDataFrame containing the polygons of the territories to be graded.</span>
+<span class="sd">    include_priority : bool, optional</span>
+<span class="sd">        Whether to include priority road networks in the grading system (default: True).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        A GeoDataFrame containing the graded territories with an added &#39;grade&#39; column.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">momepy</span><span class="o">.</span><span class="n">nx_to_gdf</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spatial_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">gdf_poly</span> <span class="o">=</span> <span class="n">PolygonSchema</span><span class="p">(</span><span class="n">gdf_poly</span><span class="p">)</span>
+    <span class="n">poly</span> <span class="o">=</span> <span class="n">gdf_poly</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+    <span class="n">reg1_points</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;reg_1&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">reg2_points</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;reg_2&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">priority_reg1_points</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">][</span><span class="s2">&quot;weight&quot;</span><span class="p">],</span> <span class="mi">60</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;reg_1&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">priority_reg2_points</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">][</span><span class="s2">&quot;weight&quot;</span><span class="p">],</span> <span class="mi">60</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;reg_2&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_nearest_dist</span><span class="p">(</span><span class="n">terr</span><span class="p">,</span> <span class="n">dist_to</span><span class="p">):</span>
+        <span class="n">terr</span> <span class="o">=</span> <span class="n">terr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span><span class="n">terr</span><span class="p">,</span> <span class="n">dist_to</span><span class="p">,</span> <span class="n">distance_col</span><span class="o">=</span><span class="s2">&quot;dist&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">index</span><span class="p">)[</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="o">~</span><span class="n">result</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span>
+
+    <span class="n">poly</span><span class="p">[</span><span class="s2">&quot;dist_to_reg1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_nearest_dist</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">reg1_points</span><span class="p">)</span>
+    <span class="n">poly</span><span class="p">[</span><span class="s2">&quot;dist_to_reg2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_nearest_dist</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">reg2_points</span><span class="p">)</span>
+    <span class="n">poly</span><span class="p">[</span><span class="s2">&quot;dist_to_edge&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_nearest_dist</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+    <span class="n">poly</span><span class="p">[</span><span class="s2">&quot;dist_to_priority_reg1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_nearest_dist</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">priority_reg1_points</span><span class="p">)</span>
+    <span class="n">poly</span><span class="p">[</span><span class="s2">&quot;dist_to_priority_reg2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_nearest_dist</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">priority_reg2_points</span><span class="p">)</span>
+
+    <span class="n">poly</span><span class="p">[</span><span class="s2">&quot;grade&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_grade_polygon</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">include_priority</span><span class="p">,))</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">poly</span><span class="p">[[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="s2">&quot;grade&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_grade_polygon"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria._grade_polygon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_grade_polygon</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">include_priority</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a grade for a territory based on its distances to transport infrastructure.</span>
+
+<span class="sd">    The grading system follows predefined thresholds for distances to key </span>
+<span class="sd">    road networks and priority transport corridors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    row : gpd.GeoDataFrame</span>
+<span class="sd">        A single row from the territory GeoDataFrame, containing distance metrics.</span>
+<span class="sd">    include_priority : bool, optional</span>
+<span class="sd">        Whether to consider priority road networks in the grading system (default: True).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The computed grade for the given territory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dist_to_reg1</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;dist_to_reg1&quot;</span><span class="p">]</span>
+    <span class="n">dist_to_reg2</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;dist_to_reg2&quot;</span><span class="p">]</span>
+    <span class="n">dist_to_edge</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;dist_to_edge&quot;</span><span class="p">]</span>
+    <span class="n">dist_to_priority1</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;dist_to_priority_reg1&quot;</span><span class="p">]</span>
+    <span class="n">dist_to_priority2</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;dist_to_priority_reg2&quot;</span><span class="p">]</span>
+
+    <span class="c1"># below numbers measured in thousands are representes in meters eg 5_000 meters ie 5km</span>
+    <span class="k">if</span> <span class="n">include_priority</span> <span class="ow">and</span> <span class="n">dist_to_priority1</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">elif</span> <span class="n">include_priority</span> <span class="ow">and</span> <span class="n">dist_to_priority1</span> <span class="o">&lt;</span> <span class="mi">10000</span> <span class="ow">and</span> <span class="n">dist_to_priority2</span> <span class="o">&lt;</span> <span class="mi">5000</span> <span class="ow">or</span> <span class="n">dist_to_reg1</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="mf">4.5</span>
+    <span class="k">elif</span> <span class="n">dist_to_reg1</span> <span class="o">&lt;</span> <span class="mi">10000</span> <span class="ow">and</span> <span class="n">dist_to_reg2</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="mf">4.0</span>
+    <span class="k">elif</span> <span class="n">include_priority</span> <span class="ow">and</span> <span class="n">dist_to_priority1</span> <span class="o">&lt;</span> <span class="mi">100000</span> <span class="ow">and</span> <span class="n">dist_to_priority2</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="mf">3.5</span>
+    <span class="k">elif</span> <span class="n">dist_to_reg1</span> <span class="o">&lt;</span> <span class="mi">100000</span> <span class="ow">and</span> <span class="n">dist_to_reg2</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="mf">3.0</span>
+    <span class="k">elif</span> <span class="n">dist_to_reg1</span> <span class="o">&gt;</span> <span class="mi">100000</span> <span class="ow">and</span> <span class="n">dist_to_reg2</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="mf">2.0</span>
+    <span class="k">elif</span> <span class="n">dist_to_reg2</span> <span class="o">&gt;</span> <span class="mi">5000</span> <span class="ow">and</span> <span class="n">dist_to_reg1</span> <span class="o">&gt;</span> <span class="mi">100000</span> <span class="ow">and</span> <span class="n">dist_to_edge</span> <span class="o">&lt;</span> <span class="mi">5000</span><span class="p">:</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">return</span> <span class="n">grade</span></div>
+
+
+<span class="n">MAX_DISTANCE</span> <span class="o">=</span> <span class="mi">15000</span>
+
+
+<div class="viewcode-block" id="find_median"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.find_median">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">find_median</span><span class="p">(</span><span class="n">city_points</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">adj_mx</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the median travel time from each city to all other cities.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    city_points : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing city locations.</span>
+<span class="sd">    adj_mx : pd.DataFrame</span>
+<span class="sd">        Adjacency matrix representing pairwise travel times between cities.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        Updated city points with a &#39;to_service&#39; column representing median travel times.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">city_points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">medians</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">adj_mx</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">index</span> <span class="o">!=</span> <span class="n">index</span><span class="p">])</span>
+        <span class="n">medians</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">median</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>  <span class="c1"># convert to hours</span>
+    <span class="n">points</span><span class="p">[</span><span class="s2">&quot;to_service&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">medians</span>
+    <span class="k">return</span> <span class="n">points</span></div>
+
+
+<div class="viewcode-block" id="weight_territory"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.weight_territory">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">weight_territory</span><span class="p">(</span>
+    <span class="n">territories</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">railway_stops</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">bus_stops</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">ferry_stops</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">airports</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">local_crs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assign weights to territories based on accessibility to key transport services.</span>
+
+<span class="sd">    This function calculates accessibility scores for each territory based on </span>
+<span class="sd">    distances to railway stops, bus stops, ferry terminals, and airports. </span>
+<span class="sd">    A weighted sum is computed using predefined importance coefficients.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    territories : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing territory geometries.</span>
+<span class="sd">    railway_stops : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of railway stops.</span>
+<span class="sd">    bus_stops : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of bus stops.</span>
+<span class="sd">    ferry_stops : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of ferry terminals.</span>
+<span class="sd">    airports : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of airport locations.</span>
+<span class="sd">    local_crs : int</span>
+<span class="sd">        Coordinate reference system to be used for spatial calculations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        Territories GeoDataFrame with assigned accessibility weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">territories</span> <span class="o">=</span> <span class="n">territories</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span>
+
+    <span class="c1"># Calculate nearest distances and weights for each type of point</span>
+
+    <span class="n">services</span> <span class="o">=</span> <span class="p">[</span><span class="n">railway_stops</span><span class="p">,</span> <span class="n">bus_stops</span><span class="p">,</span> <span class="n">ferry_stops</span><span class="p">,</span> <span class="n">airports</span><span class="p">]</span>
+    <span class="n">services_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;r_stops&quot;</span><span class="p">,</span> <span class="s2">&quot;b_stops&quot;</span><span class="p">,</span> <span class="s2">&quot;ferry&quot;</span><span class="p">,</span> <span class="s2">&quot;aero&quot;</span><span class="p">]</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+
+    <span class="n">territories</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">for</span> <span class="n">service</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">services</span><span class="p">,</span> <span class="n">services_names</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">service</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">service</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">territories</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;weight_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">service</span> <span class="o">=</span> <span class="n">PointSchema</span><span class="p">(</span><span class="n">service</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">territories_with_service</span> <span class="o">=</span> <span class="n">_get_nearest_distances</span><span class="p">(</span><span class="n">territories</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;distance_to_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">territories</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;weight_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">territories_with_service</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;distance_to_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">weight</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">MAX_DISTANCE</span> <span class="k">else</span> <span class="mf">0.0</span>
+            <span class="p">)</span>
+
+        <span class="n">territories</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">territories</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;weight_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">territories</span></div>
+
+
+<div class="viewcode-block" id="_get_nearest_distances"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria._get_nearest_distances">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_get_nearest_distances</span><span class="p">(</span>
+    <span class="n">territories</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">stops</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">distance_col</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the nearest distance between each territory and a set of transport stops.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    territories : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the territory geometries.</span>
+<span class="sd">    stops : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the stop locations.</span>
+<span class="sd">    distance_col : str</span>
+<span class="sd">        The name of the column where computed distances will be stored.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        Territories GeoDataFrame updated with nearest distances to stops.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nearest</span> <span class="o">=</span> <span class="n">territories</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span><span class="n">stops</span><span class="p">,</span> <span class="n">distance_col</span><span class="o">=</span><span class="n">distance_col</span><span class="p">)</span>
+    <span class="n">nearest_reset</span> <span class="o">=</span> <span class="n">nearest</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="n">min_idx</span> <span class="o">=</span> <span class="n">nearest_reset</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)[</span><span class="n">distance_col</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+    <span class="n">nearest_min</span> <span class="o">=</span> <span class="n">nearest_reset</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">min_idx</span><span class="p">]</span>
+    <span class="n">nearest_min</span> <span class="o">=</span> <span class="n">nearest_min</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">nearest_min</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;index_right&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="calculate_quartiles"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.calculate_quartiles">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">calculate_quartiles</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate quartile rankings for a given column in a DataFrame.</span>
+
+<span class="sd">    This function divides the values of the specified column into four quartiles </span>
+<span class="sd">    and assigns ranks from 1 to 4, where 1 represents the lowest quartile </span>
+<span class="sd">    and 4 represents the highest.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        The DataFrame containing the column to be ranked.</span>
+<span class="sd">    column : str</span>
+<span class="sd">        The name of the column for which quartiles should be calculated.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.Series</span>
+<span class="sd">        A pandas Series with assigned quartile ranks (1 to 4) for each row.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">qcut</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">],</span> <span class="n">q</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="assign_grades"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.assign_grades">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">assign_grades</span><span class="p">(</span>
+    <span class="n">graded_territories</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">accessibility_data</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">local_crs</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assign accessibility-based grades to territories.</span>
+
+<span class="sd">    This function assigns grades based on quartile rankings of car and </span>
+<span class="sd">    public transport accessibility within the dataset.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    graded_territories : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing already graded territories.</span>
+<span class="sd">    accessibility_data : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame with accessibility metrics.</span>
+<span class="sd">    local_crs : int</span>
+<span class="sd">        Coordinate reference system for spatial consistency.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        Updated territories with assigned transport accessibility grades.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure both GeoDataFrames have the same CRS</span>
+    <span class="n">accessibility_data</span> <span class="o">=</span> <span class="n">accessibility_data</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="n">graded_territories</span> <span class="o">=</span> <span class="n">graded_territories</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="n">accessibility_data</span><span class="p">[</span><span class="s1">&#39;in_car&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">accessibility_data</span><span class="p">[</span><span class="s1">&#39;in_car&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+    <span class="n">accessibility_data</span><span class="p">[</span><span class="s1">&#39;in_inter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">accessibility_data</span><span class="p">[</span><span class="s1">&#39;in_inter&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+    <span class="c1"># Calculate quartile ranks for &#39;in_car&#39; and &#39;in_inter&#39;</span>
+    <span class="n">accessibility_data</span><span class="p">[</span><span class="s2">&quot;car_access_quartile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_quartiles</span><span class="p">(</span><span class="n">accessibility_data</span><span class="p">,</span> <span class="s2">&quot;in_car&quot;</span><span class="p">)</span>
+    <span class="n">accessibility_data</span><span class="p">[</span><span class="s2">&quot;public_access_quartile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_quartiles</span><span class="p">(</span><span class="n">accessibility_data</span><span class="p">,</span> <span class="s2">&quot;in_inter&quot;</span><span class="p">)</span>
+
+    <span class="n">all_gecs_with_dist</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span>
+        <span class="n">graded_territories</span><span class="p">[</span>
+            <span class="p">[</span><span class="s2">&quot;grade&quot;</span><span class="p">,</span> <span class="s2">&quot;weight&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="s2">&quot;weight_r_stops&quot;</span><span class="p">,</span> <span class="s2">&quot;weight_b_stops&quot;</span><span class="p">,</span> <span class="s2">&quot;weight_ferry&quot;</span><span class="p">,</span> <span class="s2">&quot;weight_aero&quot;</span><span class="p">]</span>
+        <span class="p">],</span>
+        <span class="n">accessibility_data</span><span class="p">,</span>
+        <span class="n">lsuffix</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+        <span class="n">rsuffix</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span>
+        <span class="n">distance_col</span><span class="o">=</span><span class="s2">&quot;dist&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">remote_gecs</span> <span class="o">=</span> <span class="n">all_gecs_with_dist</span><span class="p">[</span><span class="n">all_gecs_with_dist</span><span class="p">[</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">remote_gecs</span><span class="p">[</span><span class="s2">&quot;public_access_quartile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">remote_gecs</span><span class="p">[</span><span class="s2">&quot;public_access_quartile&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">remote_gecs</span><span class="p">[</span><span class="s2">&quot;car_access_quartile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">remote_gecs</span><span class="p">[</span><span class="s2">&quot;car_access_quartile&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">remote_gecs</span> <span class="o">=</span> <span class="n">remote_gecs</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+    <span class="n">norm_gecs</span> <span class="o">=</span> <span class="n">all_gecs_with_dist</span><span class="p">[</span><span class="n">all_gecs_with_dist</span><span class="p">[</span><span class="s2">&quot;dist&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">norm_gecs</span><span class="p">[</span><span class="s2">&quot;intersection_area&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_gecs</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">accessibility_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;index_right&quot;</span><span class="p">],</span> <span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">unary_union</span><span class="o">.</span><span class="n">area</span>  <span class="c1"># Ensures a single geometry</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">accessibility_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;index_right&quot;</span><span class="p">],</span> <span class="s2">&quot;geometry&quot;</span><span class="p">]),</span> <span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">))</span>
+            <span class="k">else</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">accessibility_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;index_right&quot;</span><span class="p">],</span> <span class="s2">&quot;geometry&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">norm_gecs</span> <span class="o">=</span> <span class="n">norm_gecs</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">&quot;intersection_area&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">norm_gecs</span><span class="p">,</span> <span class="n">remote_gecs</span><span class="p">])</span>
+
+    <span class="c1"># Initialize columns for car and public transport grades</span>
+    <span class="n">joined</span><span class="p">[</span><span class="s2">&quot;car_grade&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">joined</span><span class="p">[</span><span class="s2">&quot;public_transport_grade&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Define the grade tables</span>
+    <span class="n">car_grade_table</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+        <span class="mf">4.5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+        <span class="mf">3.5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="mf">2.5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+        <span class="mf">1.5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">}</span>
+
+    <span class="n">public_transport_grade_table</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+        <span class="mf">4.5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+        <span class="mf">3.5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+        <span class="mf">2.5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+        <span class="mf">1.5</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Q4&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Q2&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Apply grades based on the quartiles and grade</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">joined</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">grade</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;grade&quot;</span><span class="p">]</span>
+        <span class="n">car_quartile</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;car_access_quartile&quot;</span><span class="p">]</span>
+        <span class="n">public_transport_quartile</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;public_access_quartile&quot;</span><span class="p">]</span>
+        <span class="n">car_grade</span> <span class="o">=</span> <span class="n">car_grade_table</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">grade</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q</span><span class="si">{</span><span class="n">car_quartile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">public_transport_grade</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">public_transport_grade_table</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">grade</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q</span><span class="si">{</span><span class="n">public_transport_quartile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">joined</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;car_grade&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">car_grade</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">joined</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;public_transport_grade&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">public_transport_grade</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">joined</span><span class="p">[</span><span class="s2">&quot;overall_assessment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">joined</span><span class="p">[</span><span class="s2">&quot;car_grade&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">joined</span><span class="p">[</span><span class="s2">&quot;public_transport_grade&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">joined</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name_left&quot;</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">joined</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">joined</span><span class="p">[</span>
+        <span class="p">[</span>
+            <span class="s2">&quot;geometry&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;grade&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;weight_r_stops&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;weight_b_stops&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;weight_ferry&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;weight_aero&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;car_access_quartile&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;public_access_quartile&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;car_grade&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;public_transport_grade&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;overall_assessment&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_criteria"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.get_criteria">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_criteria</span><span class="p">(</span>
+    <span class="n">graded_terr</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">towns</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">polygons</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">drive_graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">PT_graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">r_stops</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">b_stops</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ferry</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">aero</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">adj_mx_drive</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">adj_mx_PT</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">local_crs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3857</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute criteria scores for graded territories based on transport accessibility.</span>
+
+<span class="sd">    This function evaluates the connectivity and accessibility of territories </span>
+<span class="sd">    by calculating travel times, distance-based weights, and spatial join operations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    graded_terr : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of graded territories.</span>
+<span class="sd">    points : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of city and settlement points.</span>
+<span class="sd">    polygons : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing area boundaries for spatial joins.</span>
+<span class="sd">    drive_graph : nx.MultiDiGraph, optional</span>
+<span class="sd">        MultiDiGraph representing the drive network.</span>
+<span class="sd">    PT_graph : nx.MultiDiGraph, optional</span>
+<span class="sd">        MultiDiGraph representing the public transport network.</span>
+<span class="sd">    r_stops : gpd.GeoDataFrame, optional</span>
+<span class="sd">        GeoDataFrame of railway stops.</span>
+<span class="sd">    b_stops : gpd.GeoDataFrame, optional</span>
+<span class="sd">        GeoDataFrame of bus stops.</span>
+<span class="sd">    ferry : gpd.GeoDataFrame, optional</span>
+<span class="sd">        GeoDataFrame of ferry stops.</span>
+<span class="sd">    aero : gpd.GeoDataFrame, optional</span>
+<span class="sd">        GeoDataFrame of airports.</span>
+<span class="sd">    adj_mx_drive : pd.DataFrame, optional</span>
+<span class="sd">        Adjacency matrix for road travel.</span>
+<span class="sd">    adj_mx_PT : pd.DataFrame, optional</span>
+<span class="sd">        Adjacency matrix for public transport.</span>
+<span class="sd">    local_crs : int, optional</span>
+<span class="sd">        Coordinate reference system for spatial calculations (default: 3857).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing computed transport criteria scores for each territory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># graded_terr = graded_terr.reset_index(drop=True,inplace=True)</span>
+    <span class="n">graded_terr</span> <span class="o">=</span> <span class="n">graded_terr</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">towns</span> <span class="o">=</span> <span class="n">PointSchema</span><span class="p">(</span><span class="n">towns</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">polygons</span> <span class="o">=</span> <span class="n">PolygonSchema</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">adj_mx_drive</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">drive_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You should specify a drive graph to calculate the matrix&quot;</span><span class="p">)</span>
+        <span class="c1"># getting drive mx</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Getting drive matrix&quot;</span><span class="p">)</span>
+        <span class="n">adj_mx_drive</span> <span class="o">=</span> <span class="n">get_adj_matrix_gdf_to_gdf</span><span class="p">(</span>
+            <span class="n">towns</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">),</span>
+            <span class="n">towns</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">),</span>
+            <span class="n">drive_graph</span><span class="p">,</span>
+            <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;time_min&quot;</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">adj_mx_PT</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">PT_graph</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You should specify a PT graph to calculate the matrix&quot;</span><span class="p">)</span>
+        <span class="c1"># getting inter mx</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Getting PT matrix&quot;</span><span class="p">)</span>
+        <span class="n">adj_mx_PT</span> <span class="o">=</span> <span class="n">get_adj_matrix_gdf_to_gdf</span><span class="p">(</span>
+            <span class="n">towns</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">),</span>
+            <span class="n">towns</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">),</span>
+            <span class="n">PT_graph</span><span class="p">,</span>
+            <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;time_min&quot;</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># counting drive connectivity</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">find_median</span><span class="p">(</span><span class="n">towns</span><span class="p">,</span> <span class="n">adj_mx_drive</span><span class="p">)</span>
+    <span class="n">p_agg</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="s2">&quot;to_service&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">p_agg</span><span class="p">,</span> <span class="n">polygons</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;within&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;index_right&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="s2">&quot;to_service&quot;</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="n">result_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">polygons</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span> <span class="n">res</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="s2">&quot;index_right&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;to_service&quot;</span><span class="p">:</span> <span class="s2">&quot;in_car&quot;</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">result_df</span> <span class="o">=</span> <span class="n">result_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;index_right&quot;</span><span class="p">])</span>
+
+    <span class="c1"># counting inter connectivity</span>
+    <span class="n">p_inter</span> <span class="o">=</span> <span class="n">find_median</span><span class="p">(</span><span class="n">towns</span><span class="p">,</span> <span class="n">adj_mx_PT</span><span class="p">)</span>
+    <span class="n">points_inter</span> <span class="o">=</span> <span class="n">p_inter</span><span class="p">[</span><span class="n">p_inter</span><span class="p">[</span><span class="s2">&quot;to_service&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">res_inter</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">points_inter</span><span class="p">,</span> <span class="n">polygons</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;within&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;index_right&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">median</span><span class="p">([</span><span class="s2">&quot;to_service&quot;</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="n">result_df_inter</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">result_df</span><span class="p">,</span> <span class="n">res_inter</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="s2">&quot;index_right&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;index_right&quot;</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;to_service&quot;</span><span class="p">:</span> <span class="s2">&quot;in_inter&quot;</span><span class="p">})</span>
+    <span class="p">)</span>
+
+    <span class="c1"># weight territory based on distance to services</span>
+    <span class="n">graded_gdf</span> <span class="o">=</span> <span class="n">weight_territory</span><span class="p">(</span><span class="n">graded_terr</span><span class="p">,</span> <span class="n">r_stops</span><span class="p">,</span> <span class="n">b_stops</span><span class="p">,</span> <span class="n">ferry</span><span class="p">,</span> <span class="n">aero</span><span class="p">,</span> <span class="n">local_crs</span><span class="p">)</span>
+
+    <span class="c1"># assign the grades</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">assign_grades</span><span class="p">(</span><span class="n">graded_gdf</span><span class="p">,</span> <span class="n">result_df_inter</span><span class="p">[[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="s2">&quot;in_car&quot;</span><span class="p">,</span> <span class="s2">&quot;in_inter&quot;</span><span class="p">]],</span> <span class="n">local_crs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span></div>
+
+
+<span class="c1"># text interpretation of the result</span>
+
+<span class="c1"># Глобальные константы</span>
+<span class="n">GRADE_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mf">0.0</span><span class="p">:</span> <span class="s2">&quot;Территория находится в удалении (более 1 км) от любых известных дорог.&quot;</span><span class="p">,</span>
+    <span class="mf">1.0</span><span class="p">:</span> <span class="s2">&quot;Территория находится в непосредственной близости к дороге (попадают в радиус 5 км от границ территории), но нет ни одного узла УДС.&quot;</span><span class="p">,</span>
+    <span class="mf">2.0</span><span class="p">:</span> <span class="s2">&quot;Территория расположена в непосредственной близости от одной из региональной трассы (в радиус 5 км от границ территории попадает хотя бы 1 узел региональной трассы, а ближайший федеральный узел находится в более чем 100км)&quot;</span><span class="p">,</span>
+    <span class="mf">3.0</span><span class="p">:</span> <span class="s2">&quot;Территория расположена в непосредственной близости от одной из региональных трасс (в радиус 5 км от границ территории попадает хотя бы 1 узел региональной трассы, а ближайший федеральный узел находится в не более чем 100км)&quot;</span><span class="p">,</span>
+    <span class="mf">3.5</span><span class="p">:</span> <span class="s2">&quot;Территория расположена в непосредственной близости от одной из региональных трасс (в радиус 5 км от границ территории попадает хотя бы 1 узел региональной трассы, являющейся приоритетной, а ближайший федеральный узел находится в не более чем 100км)&quot;</span><span class="p">,</span>
+    <span class="mf">4.0</span><span class="p">:</span> <span class="s2">&quot;Территория расположена в непосредственной близости от одной из региональной трассы (в радиус 5 км от границ территории попадает хотя бы 1 узел региональной трассы, а ближайший федеральный узел находится в не более чем 10км)&quot;</span><span class="p">,</span>
+    <span class="mf">4.5</span><span class="p">:</span> <span class="s2">&quot;Территория расположена в непосредственной близости от одной из региональной трассы (в радиус 5 км от границ территории попадает хотя бы 1 узел региональной трассы, которая является приоритетной, а ближайший федеральный узел находится в не более чем 10км)&quot;</span><span class="p">,</span>
+    <span class="mf">5.0</span><span class="p">:</span> <span class="s2">&quot;Территория расположена в непосредственной близости от одной из региональных трасс (в радиус 5 км от границ территории попадает хотя бы 1 узел региональной трассы, являющейся приоритетной, а ближайший федеральный узел находится в не более чем 100км)&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">CAR_ACCESS_QUART_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Территория попадает в I квартиль связности (лучшие 25% МО) на личном транспорте&quot;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Территория попадает во II квартиль связности (от 50% до 25% МО) на личном транспорте&quot;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Территория попадает в III квартиль связности (от 75% до 50% МО) на личном транспорте&quot;</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;Территория попадает в IV квартиль связности (худшие 25% МО) на личном транспорте&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">PUBLIC_ACCESS_QUART_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Территория попадает в I квартиль связности (лучшие 25% МО) на общественном транспорте&quot;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Территория попадает во II квартиль связности (от 50% до 25% МО) на общественном транспорте&quot;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Территория попадает в III квартиль связности (от 75% до 50% МО) на общественном транспорте&quot;</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;Территория попадает в IV квартиль связности (худшие 25% МО) на общественном транспорте&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">WEIGHT_R_STOPS_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="kc">False</span><span class="p">:</span> <span class="s2">&quot;В радиусе 15 км отсутствуют ЖД станции&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="s2">&quot;В радиусе 15 км есть ЖД станции&quot;</span><span class="p">}</span>
+
+<span class="n">WEIGHT_B_STOPS_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kc">False</span><span class="p">:</span> <span class="s2">&quot;В радиусе 15 км отсутствуют автобусные остановки&quot;</span><span class="p">,</span>
+    <span class="kc">True</span><span class="p">:</span> <span class="s2">&quot;В радиусе 15 км есть автобусные остановки&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">WEIGHT_FERRY_DICT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kc">False</span><span class="p">:</span> <span class="s2">&quot;В радиусе 15 км отсутствуют порты/причалы/переправы&quot;</span><span class="p">,</span>
+    <span class="kc">True</span><span class="p">:</span> <span class="s2">&quot;В радиусе 15 км есть порты/причалы/переправы&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">WEIGHT_AERO_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="kc">False</span><span class="p">:</span> <span class="s2">&quot;В радиусе 15 км отсутствуют аэродромы&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">:</span> <span class="s2">&quot;В радиусе 15 км есть хотя бы 1 аэродром&quot;</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="interpret_gdf"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.interpret_gdf">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">interpret_gdf</span><span class="p">(</span><span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interprets geographic accessibility data for each criterion in the criteria DataFrame.</span>
+
+<span class="sd">    This method iterates through the criteria DataFrame, extracts relevant weights and quartiles for</span>
+<span class="sd">    each criterion, and generates an interpretation of the accessibility based on transport services</span>
+<span class="sd">    availability and accessibility quartiles.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    gdf : gpd.GeoDataGrame</span>
+<span class="sd">        gdf with pre-calculated criteria</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">        list: A list of tuples, each containing the name of the criterion and its corresponding</span>
+<span class="sd">            interpretation as a list of strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">interpretation_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+
+        <span class="n">interpretation_row</span> <span class="o">=</span> <span class="n">interpretation</span><span class="p">(</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;grade&quot;</span><span class="p">],</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;weight_r_stops&quot;</span><span class="p">],</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;weight_b_stops&quot;</span><span class="p">],</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;weight_ferry&quot;</span><span class="p">],</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;weight_aero&quot;</span><span class="p">],</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;car_access_quartile&quot;</span><span class="p">],</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;public_access_quartile&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">interpretation_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">interpretation_row</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">interpretation_list</span></div>
+
+
+<div class="viewcode-block" id="interpretation"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.criteria.html#transport_frames.criteria.interpretation">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">interpretation</span><span class="p">(</span>
+    <span class="n">grade</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">weight_r_stops</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">weight_b_stops</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">weight_ferry</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">weight_aero</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">car_access_quartile</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">public_access_quartile</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a textual interpretation of an area&#39;s transport accessibility.</span>
+
+<span class="sd">    This function evaluates an area&#39;s accessibility by analyzing transport services </span>
+<span class="sd">    (rail stops, bus stops, ferry services, and airports) and accessibility quartiles </span>
+<span class="sd">    (for car and public transport). The result is a structured textual interpretation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grade : int</span>
+<span class="sd">        The grade of the area, representing its general transport accessibility.</span>
+<span class="sd">    weight_r_stops : float</span>
+<span class="sd">        Weight indicating the presence of railway stations.</span>
+<span class="sd">    weight_b_stops : float</span>
+<span class="sd">        Weight indicating the presence of bus stops.</span>
+<span class="sd">    weight_ferry : float</span>
+<span class="sd">        Weight indicating the presence of ferry terminals.</span>
+<span class="sd">    weight_aero : float</span>
+<span class="sd">        Weight indicating the presence of airports.</span>
+<span class="sd">    car_access_quartile : int</span>
+<span class="sd">        Quartile score for car access (0-4), where 0 indicates the worst access and 4 the best.</span>
+<span class="sd">    public_access_quartile : int</span>
+<span class="sd">        Quartile score for public transport access (0-4), where 0 indicates the worst access and 4 the best.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        A list of strings providing an interpretation of the area&#39;s transport accessibility </span>
+<span class="sd">        based on its grade, service availability, and quartile scores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">texts</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Frame interpretation</span>
+    <span class="n">grade_text</span> <span class="o">=</span> <span class="n">GRADE_DICT</span><span class="p">[</span><span class="n">grade</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span>
+    <span class="n">texts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grade_text</span><span class="p">)</span>
+
+    <span class="c1"># Transport services availability</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">weight_r_stops</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">weight_b_stops</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">weight_ferry</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">weight_aero</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]):</span>
+        <span class="n">services_text</span> <span class="o">=</span> <span class="s2">&quot;В радиусе 15 км есть инфраструктура наземного, водного, воздушного общественного транспорта.&quot;</span>
+        <span class="n">normalized_services</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># All services available</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">missing_services</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">weight_r_stops</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">missing_services</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;ЖД станции&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weight_b_stops</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">missing_services</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;автобусные остановки&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weight_ferry</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">missing_services</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;порты/причалы/переправы&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weight_aero</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">missing_services</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;аэродромы&quot;</span><span class="p">)</span>
+
+        <span class="n">services_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;В радиусе 15 км отсутствуют </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing_services</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="n">normalized_services</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">weight_r_stops</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">weight_b_stops</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">weight_ferry</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">weight_aero</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">4</span>
+
+    <span class="c1"># Interpretation by accessibility quartiles</span>
+    <span class="n">car_access_text</span> <span class="o">=</span> <span class="n">CAR_ACCESS_QUART_DICT</span><span class="p">[</span><span class="n">car_access_quartile</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span>
+    <span class="n">normalized_car_access</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span> <span class="o">-</span> <span class="n">car_access_quartile</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>  <span class="c1"># From 0 to 1 (reversed)</span>
+
+    <span class="n">public_access_text</span> <span class="o">=</span> <span class="n">PUBLIC_ACCESS_QUART_DICT</span><span class="p">[</span><span class="n">public_access_quartile</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span>
+    <span class="n">normalized_public_access</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span> <span class="o">-</span> <span class="n">public_access_quartile</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>  <span class="c1"># From 0 to 1 (reversed)</span>
+
+    <span class="c1"># Sorting scores by quartiles</span>
+    <span class="n">quartile_grades</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="p">[(</span><span class="n">normalized_car_access</span><span class="p">,</span> <span class="n">car_access_text</span><span class="p">),</span> <span class="p">(</span><span class="n">normalized_public_access</span><span class="p">,</span> <span class="n">public_access_text</span><span class="p">)],</span>
+        <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Sorting grades by service</span>
+    <span class="n">service_grades</span> <span class="o">=</span> <span class="p">[(</span><span class="n">normalized_services</span><span class="p">,</span> <span class="n">services_text</span><span class="p">)]</span>
+
+    <span class="n">sorted_grades</span> <span class="o">=</span> <span class="n">quartile_grades</span> <span class="o">+</span> <span class="n">service_grades</span>
+
+    <span class="c1"># Final interpretation</span>
+    <span class="n">texts</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">text</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">sorted_grades</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">texts</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

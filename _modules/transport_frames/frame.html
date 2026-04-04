@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.frame &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">transport_frames.frame</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for transport_frames.frame</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module for creating and weighting transport frame &quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">momepy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">osmnx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ox</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">transport_frames.utils.helper_funcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSchema</span><span class="p">,</span> <span class="n">_determine_ref_type</span>
+
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextily</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ctx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandera</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandera.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Series</span>
+
+
+<div class="viewcode-block" id="PointSchema"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame.PointSchema">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PointSchema</span><span class="p">(</span><span class="n">BaseSchema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schema for validating points.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    _geom_types : list</span>
+<span class="sd">        List of allowed geometry types for the points, default is [shapely.Point]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_geom_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="CentersSchema"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame.CentersSchema">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CentersSchema</span><span class="p">(</span><span class="n">BaseSchema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schema for validating central cities.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    _geom_types : list</span>
+<span class="sd">        List of allowed geometry types for the blocks, default is [shapely.Polygon]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Series</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">_geom_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_frame"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame.get_frame">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_frame</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span> 
+              <span class="n">admin_centers</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+              <span class="n">area_polygon</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+              <span class="n">region_polygons</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+              <span class="n">country_polygon</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">=</span><span class="n">ox</span><span class="o">.</span><span class="n">geocode_to_gdf</span><span class="p">(</span><span class="s2">&quot;RUSSIA&quot;</span><span class="p">))</span><span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates frame from graph. Edges are filtered based on reg [1,2].</span>
+<span class="sd">    Region point nodes are assigned with &#39;city_name&#39; attribute.</span>
+<span class="sd">    Points, connecting the roads with other regions or countries are marked with &#39;exit&#39; and &#39;exit_country&#39;.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    graph: nx.MultiDiGraph</span>
+<span class="sd">        City network graph with classified roads and edges.</span>
+<span class="sd">    admin_centers : gpd.GeoDataFrame</span>
+<span class="sd">        Administrative region centers points to assign &#39;city_name&#39; attribute</span>
+<span class="sd">    region_polygons : gpd.GeoDataFrame</span>
+<span class="sd">        Polygons or regions of the country to assign &#39;border_region&#39; attribute to exits</span>
+<span class="sd">    country_polygon : gpd.GeoDataFrame</span>
+<span class="sd">        Polygon of the country to assign &#39;exit_country&#39; attribute</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nx.MultiDiGraph</span>
+<span class="sd">        Frame of the graph with added &#39;city_node&#39;,&#39;exit&#39;,&#39;exit_country&#39;,&#39;border_region&#39; attributes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">admin_centers</span> <span class="o">=</span> <span class="n">CentersSchema</span><span class="p">(</span><span class="n">admin_centers</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">_filter_roads</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">_assign_city_names_to_nodes</span><span class="p">(</span><span class="n">admin_centers</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">mark_exits</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">area_polygon</span><span class="p">,</span> <span class="n">region_polygons</span><span class="p">,</span> <span class="n">country_polygon</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">number_of_nodes</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">largest_component_nodes</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">weakly_connected_components</span><span class="p">(</span><span class="n">frame</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">subgraph</span><span class="p">(</span><span class="n">largest_component_nodes</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">frame</span></div>
+
+
+<div class="viewcode-block" id="_filter_roads"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame._filter_roads">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_filter_roads</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filters the graph to include only reg_1 and reg_2 roads.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    graph : nx.MultiDiGraph</span>
+<span class="sd">        graph with edges, containing &#39;reg&#39; attribute</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nx.MultiDiGraph</span>
+<span class="sd">        Frame of filtered edges with &#39;reg&#39; in [1, 2] </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">edges_to_keep</span> <span class="o">=</span> <span class="p">[(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reg&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])]</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">edge_subgraph</span><span class="p">(</span><span class="n">edges_to_keep</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+    <span class="k">return</span> <span class="n">frame</span></div>
+
+
+<div class="viewcode-block" id="_assign_city_names_to_nodes"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame._assign_city_names_to_nodes">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_assign_city_names_to_nodes</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">max_distance</span><span class="o">=</span><span class="mi">3000</span><span class="p">)</span><span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assigns city names to nodes in the graph based on proximity to city centers.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    points : gpd.GeoDataFrame</span>
+<span class="sd">        Region centers points</span>
+<span class="sd">    frame : nx.MultiDiGraph</span>
+<span class="sd">        Frame of filtered edges with &#39;reg&#39; in [1, 2] </span>
+<span class="sd">    max_distance : int</span>
+<span class="sd">        Max distance (meters) on which a node can be assigned to a city</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nx.MultiDiGraph</span>
+<span class="sd">        A frame with nodes assigned with &#39;city_name&#39; attribute</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">])</span>  <span class="c1"># Ensure same CRS</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">momepy</span><span class="o">.</span><span class="n">nx_to_gdf</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+
+    <span class="c1"># Find nearest nodes within max_distance</span>
+    <span class="n">projected</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">distance_col</span><span class="o">=</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">max_distance</span><span class="o">=</span><span class="n">max_distance</span><span class="p">)</span>
+
+    <span class="n">assigned_cities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Track assigned cities</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">projected</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
+        <span class="n">city_name</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">node_id</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">nodeID</span>
+
+        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">node_id</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;nodeID&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">node_id</span><span class="p">:</span>
+                    <span class="n">d</span><span class="p">[</span><span class="s2">&quot;city_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">city_name</span>
+                    <span class="n">assigned_cities</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">city_name</span><span class="p">)</span>  <span class="c1"># Mark as assigned</span>
+
+    <span class="c1"># Find cities that were not assigned</span>
+    <span class="n">missed_cities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="n">assigned_cities</span>
+
+    <span class="k">if</span> <span class="n">missed_cities</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Some cities weren’t assigned to nodes due to remote location:&quot;</span><span class="p">,</span> <span class="n">missed_cities</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">frame</span></div>
+
+
+<div class="viewcode-block" id="mark_exits"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame.mark_exits">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">mark_exits</span><span class="p">(</span>
+    <span class="n">frame</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span> 
+    <span class="n">area_polygon</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+    <span class="n">regions_polygons</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+    <span class="n">country_polygon</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assign the &#39;exit&#39;, &#39;exit_country&#39; and &#39;boorder_region&#39; attribute to nodes </span>
+<span class="sd">    in a GeoDataFrame based on their intersection with city boundaries.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    frame : nx.MultiDiGraph</span>
+<span class="sd">        Frame graph</span>
+<span class="sd">    area_polygon : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame with boundary of the inverstigated region</span>
+<span class="sd">    regions_polygons : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame with polygons of the regions with &#39;name&#39; column</span>
+<span class="sd">    country_polygon : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame with boundary of the inverstigated country</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nx.MultiDiGraph </span>
+<span class="sd">        Frame with assigned &#39;exit&#39;, &#39;exit_country&#39; and &#39;boorder_region&#39; node attributes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gdf_nodes</span> <span class="o">=</span> <span class="n">momepy</span><span class="o">.</span><span class="n">nx_to_gdf</span><span class="p">(</span><span class="n">frame</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">city_boundary</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">area_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gdf_nodes</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">boundary</span><span class="p">)</span>
+    <span class="n">regions_polygons</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gdf_nodes</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">country_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gdf_nodes</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">gdf_nodes</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_nodes</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">point</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">city_boundary</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.1</span><span class="p">))</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gdf_nodes</span><span class="p">[</span><span class="n">gdf_nodes</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;There are no region exits. Try using a larger polygon for downloading from osm&quot;</span><span class="p">)</span>
+    <span class="n">exits</span> <span class="o">=</span> <span class="n">gdf_nodes</span><span class="p">[</span><span class="n">gdf_nodes</span><span class="o">.</span><span class="n">exit</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">country_boundary</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">country_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">exits</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">boundary</span><span class="p">)</span>
+
+    <span class="n">exits</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exits</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">point</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">country_boundary</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.1</span><span class="p">))</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">gdf_nodes</span> <span class="o">=</span> <span class="n">gdf_nodes</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">exit_country</span><span class="o">=</span><span class="n">exits</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">])</span>
+    <span class="n">gdf_nodes</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">gdf_nodes</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">exits</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exits</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">gdf_nodes</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_nodes</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">gdf_nodes</span> <span class="o">=</span> <span class="n">add_region_attr</span><span class="p">(</span><span class="n">gdf_nodes</span><span class="p">,</span> <span class="n">regions_polygons</span><span class="p">,</span> <span class="n">area_polygon</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_nodes</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_nodes</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;border_region&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_nodes</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;border_region&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">frame</span></div>
+
+
+<div class="viewcode-block" id="add_region_attr"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame.add_region_attr">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">add_region_attr</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+                    <span class="n">regions</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+                    <span class="n">polygon_buffer</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span><span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a &#39;border_region&#39; attribute to nodes based on their intersection with region polygons.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n : gpd.GeoDataFrame</span>
+<span class="sd">        Nodes GeoDataFrame with &#39;exit&#39; and &#39;exit_country&#39; attributes</span>
+<span class="sd">    regions : GeoDataFrame</span>
+<span class="sd">        Regions GeoDataFrame with &#39;name&#39; column</span>
+<span class="sd">    polygon_buffer : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of region of interest boundary</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        Updated nodes GeoDataFrame with &#39;border_region&#39; attribute</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">exits</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">exits</span> <span class="o">=</span> <span class="n">exits</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">exits</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;buf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exits</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="n">filtered_regions</span> <span class="o">=</span> <span class="n">_filter_polygons_by_buffer</span><span class="p">(</span><span class="n">regions</span><span class="p">,</span> <span class="n">polygon_buffer</span><span class="p">,</span> <span class="n">n</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">joined_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span>
+        <span class="n">exits</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;buf&quot;</span><span class="p">),</span>
+        <span class="n">filtered_regions</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">exits</span><span class="o">.</span><span class="n">crs</span><span class="p">),</span>
+        <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">joined_gdf</span> <span class="o">=</span> <span class="n">joined_gdf</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+    <span class="n">exits</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;border_region&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">joined_gdf</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+    <span class="n">n</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;border_region&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exits</span><span class="p">[</span><span class="s2">&quot;border_region&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">n</span></div>
+
+
+<div class="viewcode-block" id="_filter_polygons_by_buffer"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame._filter_polygons_by_buffer">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_filter_polygons_by_buffer</span><span class="p">(</span><span class="n">gdf_polygons</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+                               <span class="n">polygon_buffer</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">,</span> 
+                               <span class="n">crs</span><span class="p">)</span><span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract and filter region polygons based on a buffer around a given polygon.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    gdf_polygons : gpd.GeoDataFrame</span>
+<span class="sd">        Gdf of regions polygons</span>
+<span class="sd">    polygon_buffer : Polygon</span>
+<span class="sd">        Polygon of the buffer polygon.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    - GeoDataFrame: Filtered GeoDataFrame of region polygons.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gdf_polygons</span> <span class="o">=</span> <span class="n">gdf_polygons</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">polygon_buffer</span> <span class="o">=</span> <span class="n">polygon_buffer</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">polygon_buffer</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">polygon_buffer</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)},</span> <span class="n">crs</span><span class="o">=</span><span class="n">polygon_buffer</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span>
+        <span class="n">gdf_polygons</span><span class="o">.</span><span class="n">crs</span>
+    <span class="p">)</span>
+    <span class="n">gdf_polygons</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">overlay</span><span class="p">(</span><span class="n">gdf_polygons</span><span class="p">,</span> <span class="n">polygon_buffer</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;difference&quot;</span><span class="p">)</span>
+    <span class="n">buffer_polygon</span> <span class="o">=</span> <span class="n">polygon_buffer</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span>
+    <span class="n">filtered_gdf</span> <span class="o">=</span> <span class="n">gdf_polygons</span><span class="p">[</span><span class="n">gdf_polygons</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">buffer_polygon</span><span class="o">.</span><span class="n">unary_union</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">filtered_gdf</span></div>
+
+
+<div class="viewcode-block" id="plot_frame"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame.plot_frame">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">plot_frame</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span> 
+               <span class="n">zoom_out_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot the transport frame with exit points, city nodes, and categorized roads.</span>
+
+<span class="sd">    The function visualizes the road network using a basemap and styles edges and nodes based on their attributes:</span>
+<span class="sd">    </span>
+<span class="sd">    - **Edges (Road Segments)**:</span>
+<span class="sd">      - `reg == 1` → Red (Higher priority roads)</span>
+<span class="sd">      - `reg == 2` → Blue (Lower priority roads)</span>
+<span class="sd">    - **Nodes (Intersections &amp; Key Points)**:</span>
+<span class="sd">      - `exit == 1` → Green (Exit points)</span>
+<span class="sd">      - `exit_country == 1` → Black (Country exit points)</span>
+<span class="sd">      - `city_name.notna()` → Red (City center nodes)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    frame : nx.MultiDiGraph</span>
+<span class="sd">        The road network graph.</span>
+<span class="sd">    zoom_out_factor : float, optional</span>
+<span class="sd">        Scaling factor to adjust the map extent by zooming out (default: `1.1`).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        Displays a styled transport frame plot with a basemap and legend.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert graph to GeoDataFrames</span>
+    <span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">momepy</span><span class="o">.</span><span class="n">nx_to_gdf</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+
+    <span class="c1"># Convert to Web Mercator (EPSG:3857)</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3857</span><span class="p">)</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3857</span><span class="p">)</span>
+
+    <span class="c1"># Set up the figure</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+    <span class="c1"># Get bounding box and compute margins for zoom-out effect</span>
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">total_bounds</span>
+    <span class="n">x_margin</span> <span class="o">=</span> <span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">zoom_out_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">y_margin</span> <span class="o">=</span> <span class="p">(</span><span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">zoom_out_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="c1"># Apply new limits with margins</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">x_margin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">x_margin</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span> <span class="o">-</span> <span class="n">y_margin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">y_margin</span><span class="p">)</span>
+
+    <span class="c1"># Add basemap</span>
+    <span class="n">basemap</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">OpenStreetMap</span><span class="o">.</span><span class="n">Mapnik</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">OpenStreetMap</span><span class="o">.</span><span class="n">Mapnik</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add_basemap</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">basemap</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">3857</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+
+    <span class="c1"># **Plot edges (roads)**</span>
+    <span class="n">edges</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Reg 1&quot;</span><span class="p">)</span>
+    <span class="n">edges</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Reg 2&quot;</span><span class="p">)</span>
+
+    <span class="c1"># **Plot nodes (intersections, exits, cities)**</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Exit Nodes&quot;</span><span class="p">)</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Country Exit Nodes&quot;</span><span class="p">)</span>
+    <span class="n">nodes</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;city_name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;City Nodes&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Remove axis labels and frame</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_frame_on</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Add legend</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Show plot</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="weigh_roads"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame.weigh_roads">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">weigh_roads</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span> <span class="n">restricted_terr_gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assigns and normalizes weights for roads in the network based on their proximity to exits.</span>
+
+<span class="sd">    The function calculates road segment (edge) weights by evaluating their connections to </span>
+<span class="sd">    exit points and the type of regions they traverse. If provided, restricted territories </span>
+<span class="sd">    influence weight assignment. The function then normalizes weights for further analysis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    frame : nx.MultiDiGraph</span>
+<span class="sd">        The road network graph where nodes represent intersections or exits, </span>
+<span class="sd">        and edges represent road segments.</span>
+<span class="sd">    restricted_terr_gdf : gpd.GeoDataFrame, optional</span>
+<span class="sd">        GeoDataFrame containing restricted territories that may influence </span>
+<span class="sd">        road weight calculations (default: `None`).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nx.MultiDiGraph</span>
+<span class="sd">        The updated road network graph with assigned and normalized road segment weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">momepy</span><span class="o">.</span><span class="n">nx_to_gdf</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+    <span class="n">n</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">_mark_ref_type</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">restricted_terr_gdf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">country_exits</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Преобразуем CRS для совместимости</span>
+        <span class="n">restricted_terr_gdf</span> <span class="o">=</span> <span class="n">restricted_terr_gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">country_exits</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+        <span class="c1"># Для каждой страны из restricted_terr_gdf применяем логику</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">restricted_terr_gdf</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">border_transformed</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span>
+            <span class="n">buffer_area</span> <span class="o">=</span> <span class="n">border_transformed</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">country_exits</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">buffer_area</span><span class="p">))</span>
+
+            <span class="c1"># Применяем метку (mark) к соответствующим участкам</span>
+            <span class="n">n</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="n">mask</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;ref_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;mark&quot;</span><span class="p">]</span>
+
+    <span class="n">e</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">n</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">exits</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i1</span><span class="p">,</span> <span class="n">start_node</span> <span class="ow">in</span> <span class="n">exits</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i2</span><span class="p">,</span> <span class="n">end_node</span> <span class="ow">in</span> <span class="n">exits</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">i1</span> <span class="o">==</span> <span class="n">i2</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">start_node</span><span class="p">[</span><span class="s2">&quot;border_region&quot;</span><span class="p">])</span> <span class="ow">and</span> <span class="n">start_node</span><span class="p">[</span><span class="s2">&quot;border_region&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">end_node</span><span class="p">[</span><span class="s2">&quot;border_region&quot;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">start_node</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">15000</span><span class="p">)</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">end_node</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">15000</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">start_node</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">end_node</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">start_node</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">end_node</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">weight</span> <span class="o">=</span> <span class="n">_get_weight</span><span class="p">(</span><span class="n">start_node</span><span class="p">[</span><span class="s2">&quot;ref_type&quot;</span><span class="p">],</span> <span class="n">end_node</span><span class="p">[</span><span class="s2">&quot;ref_type&quot;</span><span class="p">],</span> <span class="n">end_node</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">])</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">astar_path</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s2">&quot;time_min&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">nx</span><span class="o">.</span><span class="n">NetworkXNoPath</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">n</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">path</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">weight</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                    <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s2">&quot;node_start&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">path</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s2">&quot;node_end&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">path</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]),</span>
+                    <span class="s2">&quot;weight&quot;</span><span class="p">,</span>
+                <span class="p">]</span> <span class="o">+=</span> <span class="n">weight</span>
+            <span class="n">n</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">n</span><span class="p">[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">path</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]),</span> <span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">weight</span>
+
+    <span class="n">n</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">min_weight</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">max_weight</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">e</span><span class="p">[</span><span class="s2">&quot;norm_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">min_weight</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_weight</span> <span class="o">-</span> <span class="n">min_weight</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="n">i</span><span class="p">]][</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;norm_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="n">i</span><span class="p">]][</span><span class="s2">&quot;norm_weight&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;exit_country&quot;</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ref_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;ref_type&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">frame</span></div>
+
+
+<div class="viewcode-block" id="_mark_ref_type"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame._mark_ref_type">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_mark_ref_type</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+                   <span class="n">e</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> 
+                   <span class="n">frame</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assign reference types to nodes in the road network based on proximity to reference edges.</span>
+
+<span class="sd">    This function identifies nodes marked as exits and assigns reference values and types </span>
+<span class="sd">    based on the closest reference edge. The assigned values help categorize roads </span>
+<span class="sd">    according to their significance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of road network nodes, including exit nodes to be marked with reference types.</span>
+<span class="sd">    e : gpd.GeoDataFrame</span>
+<span class="sd">        GeoDataFrame of road network edges containing reference attributes used for classification.</span>
+<span class="sd">    frame : nx.MultiDiGraph</span>
+<span class="sd">        The road network graph where nodes represent intersections or exits.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[gpd.GeoDataFrame, gpd.GeoDataFrame, nx.MultiDiGraph]</span>
+<span class="sd">        - Updated GeoDataFrame of nodes with assigned reference values and types.</span>
+<span class="sd">        - The original GeoDataFrame of edges.</span>
+<span class="sd">        - The updated road network graph with relabeled nodes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span><span class="p">[</span><span class="s2">&quot;ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ref_edges</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="n">e</span><span class="p">[</span><span class="s2">&quot;ref&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">n</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+
+        <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;exit&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">geometry</span>
+            <span class="n">distances</span> <span class="o">=</span> <span class="n">ref_edges</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">distances</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">nearest_edge</span> <span class="o">=</span> <span class="n">ref_edges</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">distances</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()]</span>
+                <span class="n">ref_value</span> <span class="o">=</span> <span class="n">nearest_edge</span><span class="p">[</span><span class="s2">&quot;ref&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ref_value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">ref_value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ref_value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ref_value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">ref_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">ref_value</span><span class="p">,)</span>
+                <span class="n">n</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref_value</span>
+                <span class="n">n</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="s2">&quot;ref_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_determine_ref_type</span><span class="p">(</span><span class="n">ref_value</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;nodeID&quot;</span><span class="p">)</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;nodeID&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)}</span>
+    <span class="n">n</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">n</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">frame</span></div>
+
+
+<div class="viewcode-block" id="_determine_ref_type"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame._determine_ref_type">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_determine_ref_type</span><span class="p">(</span><span class="n">ref</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a reference string into a numeric classification.</span>
+
+<span class="sd">    This function categorizes road references based on predefined patterns, </span>
+<span class="sd">    assigning a numeric value that represents the road type.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ref : str</span>
+<span class="sd">        A road reference string that follows a standard naming convention.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        A numeric code corresponding to the identified reference type. If no match is found, </span>
+<span class="sd">        a default classification (2.3) is assigned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">patterns</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mf">1.1</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;М-\d+&quot;</span><span class="p">,</span>
+        <span class="mf">1.2</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;Р-\d+&quot;</span><span class="p">,</span>
+        <span class="mf">1.3</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;А-\d+&quot;</span><span class="p">,</span>
+        <span class="mf">2.1</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;..Р-\d+&quot;</span><span class="p">,</span>
+        <span class="mf">2.2</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;..А-\d+&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ref</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ref_type</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ref_type</span>
+    <span class="k">return</span> <span class="mf">2.3</span></div>
+
+
+<div class="viewcode-block" id="_get_weight"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame._get_weight">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_get_weight</span><span class="p">(</span><span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">exit</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the weight for a road segment based on reference types and exit status.</span>
+
+<span class="sd">    This function determines the weight of a road connection by considering the reference types </span>
+<span class="sd">    of the start and end nodes, as well as whether the segment represents an exit. Different </span>
+<span class="sd">    weight matrices are used for exit and non-exit scenarios.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    start : float</span>
+<span class="sd">        The reference type classification of the start node.</span>
+<span class="sd">    end : float</span>
+<span class="sd">        The reference type classification of the end node.</span>
+<span class="sd">    exit : bool</span>
+<span class="sd">        Indicates whether the segment represents an exit (True if exit, False otherwise).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The weight value derived from the corresponding weight matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="mf">1.1</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">2.3</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">:</span> <span class="mi">7</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">exit</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.1.1</span>
+            <span class="p">[</span><span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.1.2</span>
+            <span class="p">[</span><span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.1.3</span>
+            <span class="p">[</span><span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.2.1</span>
+            <span class="p">[</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.2.2</span>
+            <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.2.3</span>
+            <span class="p">[</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.2.3</span>
+            <span class="p">[</span><span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">matrix</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.1.1</span>
+            <span class="p">[</span><span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.07</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.1.2</span>
+            <span class="p">[</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.1.3</span>
+            <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.2.1</span>
+            <span class="p">[</span><span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.2.2</span>
+            <span class="p">[</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>  <span class="c1"># 2.2.3</span>
+            <span class="p">[</span><span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="k">return</span> <span class="n">matrix</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="n">end</span><span class="p">]][</span><span class="nb">dict</span><span class="p">[</span><span class="n">start</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="plot_weighted_roads"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.frame.html#transport_frames.frame.plot_weighted_roads">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">plot_weighted_roads</span><span class="p">(</span>
+    <span class="n">weighted_graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">zoom_out_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visualize a weighted road network on a map.</span>
+
+<span class="sd">    This function plots a road network where the thickness of edges corresponds to their </span>
+<span class="sd">    assigned weights. The visualization includes a basemap for spatial context.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    weighted_graph : nx.MultiDiGraph</span>
+<span class="sd">        The road network graph where edges contain weight attributes.</span>
+<span class="sd">    scaling_factor : int, optional</span>
+<span class="sd">        Factor to scale line thickness based on edge weight (default: 10).</span>
+<span class="sd">    zoom_out_factor : float, optional</span>
+<span class="sd">        Factor to slightly expand the map view beyond the network boundaries (default: 1.1).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">        Displays the road network plot with weighted edges.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">momepy</span><span class="o">.</span><span class="n">nx_to_gdf</span><span class="p">(</span><span class="n">weighted_graph</span><span class="p">)</span>
+
+    <span class="c1"># Filter only weighted edges</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Normalize weight for line thickness</span>
+    <span class="n">edges</span><span class="p">[</span><span class="s2">&quot;scaled_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">edges</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="n">scaling_factor</span>
+
+    <span class="c1"># Convert to Web Mercator (EPSG:3857) for basemap compatibility</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3857</span><span class="p">)</span>
+
+    <span class="c1"># Set up the figure</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">total_bounds</span>
+    <span class="n">x_margin</span> <span class="o">=</span> <span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">zoom_out_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">y_margin</span> <span class="o">=</span> <span class="p">(</span><span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">zoom_out_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="c1"># Apply new limits with margins</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span> <span class="o">-</span> <span class="n">x_margin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">+</span> <span class="n">x_margin</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span> <span class="o">-</span> <span class="n">y_margin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">+</span> <span class="n">y_margin</span><span class="p">)</span>
+
+    <span class="c1"># Add basemap</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add_basemap</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">OpenStreetMap</span><span class="o">.</span><span class="n">Mapnik</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="mi">3857</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Plot weighted roads</span>
+    <span class="n">edges</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;scaled_weight&quot;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+
+    <span class="c1"># Remove axis labels and frame</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_frame_on</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Show plot</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.graph &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="transport_frames.frame" href="transport_frames.frame.html" />
+    <link rel="prev" title="API documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">transport_frames.graph</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.graph.PolygonSchema"><code class="docutils literal notranslate"><span class="pre">PolygonSchema</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.graph.PolygonSchema.Config"><code class="docutils literal notranslate"><span class="pre">PolygonSchema.Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.graph.get_graph"><code class="docutils literal notranslate"><span class="pre">get_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.graph.get_intermodal_graph"><code class="docutils literal notranslate"><span class="pre">get_intermodal_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.graph._category_to_reg"><code class="docutils literal notranslate"><span class="pre">_category_to_reg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.graph._ensure_reg_attr"><code class="docutils literal notranslate"><span class="pre">_ensure_reg_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.graph.classify_nodes"><code class="docutils literal notranslate"><span class="pre">classify_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.graph._crop_edges_by_polygon"><code class="docutils literal notranslate"><span class="pre">_crop_edges_by_polygon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.graph._create_graph"><code class="docutils literal notranslate"><span class="pre">_create_graph()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.frame.html">transport_frames.frame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.criteria.html">transport_frames.criteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.indicators.html">transport_frames.indicators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.road_adder.html">transport_frames.road_adder</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API documentation</a></li>
+      <li class="breadcrumb-item active">transport_frames.graph</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/transport_frames.graph.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-transport_frames.graph">
+<span id="transport-frames-graph"></span><h1>transport_frames.graph<a class="headerlink" href="#module-transport_frames.graph" title="Permalink to this heading"></a></h1>
+<p>Module for creating city network graph from polygon</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.graph.classify_nodes" title="transport_frames.graph.classify_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">classify_nodes</span></code></a>(graph)</p></td>
+<td><p>Assigns reg_status to nodes based on edge data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.graph.get_graph" title="transport_frames.graph.get_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_graph</span></code></a>(*[, osm_id, territory, buffer])</p></td>
+<td><p>Collect a drive graph from OSM relation id or input territory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.graph.get_intermodal_graph" title="transport_frames.graph.get_intermodal_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_intermodal_graph</span></code></a>(*[, osm_id, territory])</p></td>
+<td><p>Collect an intermodal graph (public transport + walking) from OSM id or territory.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.graph.PolygonSchema" title="transport_frames.graph.PolygonSchema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PolygonSchema</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Schema for validating polygons.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.graph.PolygonSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transport_frames.graph.</span></span><span class="sig-name descname"><span class="pre">PolygonSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/transport_frames/graph.html#PolygonSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.graph.PolygonSchema" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code></p>
+<p>Schema for validating polygons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_geom_types</strong> (<em>list</em>) – List of allowed geometry types for the blocks, default is [shapely.Polygon]</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.graph.PolygonSchema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#transport_frames.graph.PolygonSchema.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.graph.PolygonSchema.Config.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PolygonSchema'</span></em><a class="headerlink" href="#transport_frames.graph.PolygonSchema.Config.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.graph.get_graph">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.graph.</span></span><span class="sig-name descname"><span class="pre">get_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">osm_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">territory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/graph.html#get_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.graph.get_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Collect a drive graph from OSM relation id or input territory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>osm_id</strong> (<em>int</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – OSM relation id. If provided, territory is downloaded from OSM by id.</p></li>
+<li><p><strong>territory</strong> (<em>gpd.GeoDataFrame</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Territory boundary as GeoDataFrame.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Local projection CRS. If None, estimated from territory via <cite>estimate_utm_crs()</cite>.</p></li>
+<li><p><strong>buffer</strong> (<em>int</em><em>, </em><em>optional</em>) – Buffer distance (meters) used before graph download.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Region network drive graph.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.graph.get_intermodal_graph">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.graph.</span></span><span class="sig-name descname"><span class="pre">get_intermodal_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">osm_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">territory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/graph.html#get_intermodal_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.graph.get_intermodal_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Collect an intermodal graph (public transport + walking) from OSM id or territory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>osm_id</strong> (<em>int</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – OSM relation id. If provided, territory is downloaded from OSM by id.</p></li>
+<li><p><strong>territory</strong> (<em>gpd.GeoDataFrame</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Territory boundary as GeoDataFrame.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Intermodal graph.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.graph._category_to_reg">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.graph.</span></span><span class="sig-name descname"><span class="pre">_category_to_reg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/transport_frames/graph.html#_category_to_reg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.graph._category_to_reg" title="Permalink to this definition"></a></dt>
+<dd><p>Convert iduedu road category into legacy numeric reg code.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.graph._ensure_reg_attr">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.graph.</span></span><span class="sig-name descname"><span class="pre">_ensure_reg_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/graph.html#_ensure_reg_attr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.graph._ensure_reg_attr" title="Permalink to this definition"></a></dt>
+<dd><p>Ensure every edge has numeric <cite>reg</cite> attribute derived from <cite>category</cite> if needed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.graph.classify_nodes">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.graph.</span></span><span class="sig-name descname"><span class="pre">classify_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/graph.html#classify_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.graph.classify_nodes" title="Permalink to this definition"></a></dt>
+<dd><p>Assigns reg_status to nodes based on edge data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – The road network graph with classified edges</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>City network drive graph with classified nodes and edges</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.graph._crop_edges_by_polygon">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.graph.</span></span><span class="sig-name descname"><span class="pre">_crop_edges_by_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polygon</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/graph.html#_crop_edges_by_polygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.graph._crop_edges_by_polygon" title="Permalink to this definition"></a></dt>
+<dd><p>Updates edge geometries based on intersections with the city boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – The city network graph</p></li>
+<li><p><strong>polygon</strong> (<em>Polygon</em>) – The Polygon to crop edges with</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>City network drive graph with cropped edges</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.graph._create_graph">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.graph.</span></span><span class="sig-name descname"><span class="pre">_create_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/graph.html#_create_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.graph._create_graph" title="Permalink to this definition"></a></dt>
+<dd><p>Create a graph based on edges and node coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edges</strong> (<em>gpd.GeoDataFrame:</em>) – The edges with their attributes and geometries</p></li>
+<li><p><strong>nodes_coord</strong> (<em>dict</em>) – A dictionary containing node coordinates</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The constructed graph</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="API documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="transport_frames.frame.html" class="btn btn-neutral float-right" title="transport_frames.frame" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

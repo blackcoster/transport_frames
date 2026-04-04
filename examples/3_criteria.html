@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Territory grade and criteria &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Adding roads to the graph" href="4_road_adder.html" />
+    <link rel="prev" title="Indicators calculation" href="2_indicators.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_graph_frame_creation.html">Graph creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_indicators.html">Indicators calculation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Territory grade and criteria</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Initialization">Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Territory-grade-(frame-based)">Territory grade (frame-based)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Territory-Grade">Territory Grade</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Transport-Criteria">Transport Criteria</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="4_road_adder.html">Adding roads to the graph</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Territory grade and criteria</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/3_criteria.nblink.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Territory-grade-and-criteria">
+<h1>Territory grade and criteria<a class="headerlink" href="#Territory-grade-and-criteria" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import geopandas as gpd
+import pandas as pd
+
+import os
+os.getcwd()
+
+import pickle
+</pre></div>
+</div>
+</div>
+<section id="Initialization">
+<h2>Initialization<a class="headerlink" href="#Initialization" title="Permalink to this heading"></a></h2>
+<p>Specify the right local CRS for yout territory (make sure it is Projection CRS, not the Geographical CRS).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>local_crs = 32637 # Tula region crs
+</pre></div>
+</div>
+</div>
+<p>Initialize the territory</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>municipalities_polygons = gpd.read_file(&quot;data/tula_region_municipalities.geojson&quot;)
+municipalities_polygons.plot()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: &gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_3_criteria_6_1.png" src="../_images/examples_3_criteria_6_1.png" />
+</div>
+</div>
+</section>
+<section id="Territory-grade-(frame-based)">
+<h2>Territory grade (frame-based)<a class="headerlink" href="#Territory-grade-(frame-based)" title="Permalink to this heading"></a></h2>
+<p>Use the results obtained from <code class="docutils literal notranslate"><span class="pre">transport_frames.frame.get_frame()</span></code> and <code class="docutils literal notranslate"><span class="pre">transport_frames.frame.weight_roads()</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with open(&quot;data/G_weighted_frame.pickle&quot;, &quot;rb&quot;) as f:
+    weighted_frame = pickle.load(f)
+</pre></div>
+</div>
+</div>
+<section id="Territory-Grade">
+<h3>Territory Grade<a class="headerlink" href="#Territory-Grade" title="Permalink to this heading"></a></h3>
+<p>Grade is assigned to the territory based on its linear distance to federal and regional roads.</p>
+<p><strong>Road class legend</strong> - <code class="docutils literal notranslate"><span class="pre">reg</span> <span class="pre">=</span> <span class="pre">1</span></code> — <strong>federal</strong> - <code class="docutils literal notranslate"><span class="pre">reg</span> <span class="pre">=</span> <span class="pre">2</span></code> — <strong>regional</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Condition</p></th>
+<th class="head"><p>Grade</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Priority federal node (<code class="docutils literal notranslate"><span class="pre">reg=1</span></code>) within 5 km</p></td>
+<td><p>5.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Federal node (<code class="docutils literal notranslate"><span class="pre">reg=1</span></code>) within 5 km</p></td>
+<td><p>4.5</p></td>
+</tr>
+<tr class="row-even"><td><p>Priority regional node (<code class="docutils literal notranslate"><span class="pre">reg=2</span></code>) within 5 km, nearest federal node by graph distance ≤ 10 km</p></td>
+<td><p>4.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Regional node (<code class="docutils literal notranslate"><span class="pre">reg=2</span></code>) within 5 km, nearest federal node by graph distance ≤ 10 km</p></td>
+<td><p>4.0</p></td>
+</tr>
+<tr class="row-even"><td><p>Priority regional node (<code class="docutils literal notranslate"><span class="pre">reg=2</span></code>) within 5 km, nearest federal node by graph distance ≤ 100 km</p></td>
+<td><p>3.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Regional node (<code class="docutils literal notranslate"><span class="pre">reg=2</span></code>) within 5 km, nearest federal node by graph distance ≤ 100 km</p></td>
+<td><p>3.0</p></td>
+</tr>
+<tr class="row-even"><td><p>Regional node (<code class="docutils literal notranslate"><span class="pre">reg=2</span></code>) within 5 km, nearest federal node by graph distance &gt; 100 km</p></td>
+<td><p>2.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>No nodes, but graph edges are within 5 km</p></td>
+<td><p>1.0</p></td>
+</tr>
+<tr class="row-even"><td><p>No known roads within 1 km</p></td>
+<td><p>0.0</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bonus</strong> - Railway station within 10 km: <code class="docutils literal notranslate"><span class="pre">+0.5</span></code> (added to the base grade).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from transport_frames.criteria import grade_territory
+
+graded_territory= grade_territory(weighted_frame, municipalities_polygons)
+graded_territory
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>grade</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Манаенское</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>3.5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Астаповское</td>
+      <td>POLYGON ((36.47061 53.63576, 36.48947 53.63114...</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Арсеньево</td>
+      <td>POLYGON ((36.63005 53.72754, 36.63174 53.72702...</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Левобережное</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>3.5</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Правобережное</td>
+      <td>POLYGON ((36.1455 53.80533, 36.14561 53.80468,...</td>
+      <td>3.5</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>79</th>
+      <td>Яснополянское</td>
+      <td>POLYGON ((37.17494 54.04491, 37.1757 54.0431, ...</td>
+      <td>5.0</td>
+    </tr>
+    <tr>
+      <th>80</th>
+      <td>Ясногорск</td>
+      <td>POLYGON ((37.66036 54.50418, 37.67147 54.4978,...</td>
+      <td>4.5</td>
+    </tr>
+    <tr>
+      <th>81</th>
+      <td>Теляковское</td>
+      <td>POLYGON ((37.60388 54.56328, 37.60784 54.55777...</td>
+      <td>5.0</td>
+    </tr>
+    <tr>
+      <th>82</th>
+      <td>Ревякинское</td>
+      <td>POLYGON ((37.47214 54.48182, 37.47222 54.48006...</td>
+      <td>5.0</td>
+    </tr>
+    <tr>
+      <th>83</th>
+      <td>Иваньковское</td>
+      <td>POLYGON ((37.68687 54.71385, 37.69127 54.71262...</td>
+      <td>4.5</td>
+    </tr>
+  </tbody>
+</table>
+<p>84 rows × 3 columns</p>
+</div></div>
+</div>
+</section>
+</section>
+<section id="Transport-Criteria">
+<h2>Transport Criteria<a class="headerlink" href="#Transport-Criteria" title="Permalink to this heading"></a></h2>
+<p>District polygons and settlement points are used for calculating quartile of settlement connectivity of the territory (aggregated by polygons).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>districts_polygons = gpd.read_file(&quot;data/tula_region_districts.geojson&quot;)
+settlement_points = gpd.read_file(&quot;data/tula_region_towns.geojson&quot;)
+</pre></div>
+</div>
+</div>
+<p>Initialize the gdfs of railway stations, bus stops, fuel stations and aerodromes. The services should be presented as Points.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>railway_stations = gpd.read_file(&quot;data/tula_region_railway_stations.geojson&quot;)
+bus_stops = gpd.read_file(&quot;data/tula_region_bus_stops.geojson&quot;)
+local_aerodrome = gpd.read_file(&quot;data/tula_region_aerodrome.geojson&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>local_aerodrome[&quot;geometry&quot;] = local_aerodrome.geometry.representative_point()
+</pre></div>
+</div>
+</div>
+<p>Criteria is calculated based on drive and public tranport connectivity, frame-based grade, distance to the services.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Transport</span></code> criterion combines: - the territory position relative to the transport framework; - the average travel connectivity from the territory to other territories.</p>
+<p><strong>Service Availability Weight (within 15 km)</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Service</p></th>
+<th class="head"><p>Weight</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Bus stop</p></td>
+<td><p>0.35</p></td>
+</tr>
+<tr class="row-odd"><td><p>Railway stop/station</p></td>
+<td><p>0.35</p></td>
+</tr>
+<tr class="row-even"><td><p>Port / pier / ferry crossing</p></td>
+<td><p>0.20</p></td>
+</tr>
+<tr class="row-odd"><td><p>Airfield</p></td>
+<td><p>0.10</p></td>
+</tr>
+</tbody>
+</table>
+<p>Rules: - If several service types are present, weights are summed. - If a service type is absent, its weight is <code class="docutils literal notranslate"><span class="pre">0</span></code>. - If all service types are absent, total weight is <code class="docutils literal notranslate"><span class="pre">W</span> <span class="pre">=</span> <span class="pre">0</span></code>.</p>
+<p><strong>Apply Quartile-Based Coefficients</strong></p>
+<p>First, determine the average transport connectivity quartile for all municipalities in the project area: - Q4: worst 25% - Q3: 75% to 50% - Q2: 50% to 25% - Q1: best 25%</p>
+<p>Then use transport-framework score <code class="docutils literal notranslate"><span class="pre">F</span></code> and weight <code class="docutils literal notranslate"><span class="pre">W</span></code>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">F</span></code></p></th>
+<th class="head"><p>Q4 Private</p></th>
+<th class="head"><p>Q4 Public</p></th>
+<th class="head"><p>Q3 Private</p></th>
+<th class="head"><p>Q3 Public</p></th>
+<th class="head"><p>Q2 Private</p></th>
+<th class="head"><p>Q2 Public</p></th>
+<th class="head"><p>Q1 Private</p></th>
+<th class="head"><p>Q1 Public</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>5.0</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3*W</span></code></p></td>
+<td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4*W</span></code></p></td>
+<td><p>5</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5*W</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>4.5</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3*W</span></code></p></td>
+<td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4*W</span></code></p></td>
+<td><p>5</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5*W</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>4.0</p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3*W</span></code></p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4*W</span></code></p></td>
+<td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5*W</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>3.5</p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1*W</span></code></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3*W</span></code></p></td>
+<td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5*W</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>3.0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1*W</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3*W</span></code></p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4*W</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>2.5</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1*W</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3*W</span></code></p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4*W</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>2.0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0*W</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1*W</span></code></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4*W</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>1.5</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0*W</span></code></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1*W</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3*W</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>1.0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0*W</span></code></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0*W</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1*W</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3*W</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>0.0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0*W</span></code></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0*W</span></code></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1*W</span></code></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2*W</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Final Score</strong></p>
+<div class="line-block">
+<div class="line">Each territory receives two separate scores: one for private transport and one for public transport.</div>
+<div class="line">The final transport score is obtained by averaging these two scores with equal weight.</div>
+<div class="line">The final value ranges from <code class="docutils literal notranslate"><span class="pre">0</span></code> to <code class="docutils literal notranslate"><span class="pre">5</span></code>.</div>
+</div>
+<p>Connectivity data can be obtained using pre-calculated adjacency matrices or calculated automatically based on graphs.</p>
+<p>Adjacency matrices for drive and PT graphs can be calculated using <code class="docutils literal notranslate"><span class="pre">iduedu.get_adj_matrix_gdf_to_gdf()</span></code></p>
+<p>Drive and intermodal graphs can be obtained using <code class="docutils literal notranslate"><span class="pre">transport_frames.graph.get_graph()</span></code> and <code class="docutils literal notranslate"><span class="pre">transport_frames.graph.get_intermodal_graph()</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with open(&quot;data/G_drive.pickle&quot;, &quot;rb&quot;) as f:
+    G_drive = pickle.load(f)
+
+with open(&quot;data/G_inter.pickle&quot;, &quot;rb&quot;) as f:
+    G_pt = pickle.load(f)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from transport_frames.criteria import get_criteria
+
+criteria_gdf = get_criteria(graded_terr = graded_territory,
+                                           towns = settlement_points,
+                                           polygons = districts_polygons,
+                                           drive_graph = G_drive,
+                                           PT_graph = G_pt,
+                                           r_stops = railway_stations,
+                                           b_stops = bus_stops,
+                                           ferry = None, # there aro no ferry ports in Tula region
+                                           aero = local_aerodrome,
+                                           adj_mx_drive = None,
+                                           adj_mx_PT = None,
+                                           local_crs = local_crs
+                                           )
+criteria_gdf
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Getting drive matrix
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-05 00:05:02.449 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Getting PT matrix
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>geometry</th>
+      <th>name</th>
+      <th>grade</th>
+      <th>weight</th>
+      <th>weight_r_stops</th>
+      <th>weight_b_stops</th>
+      <th>weight_ferry</th>
+      <th>weight_aero</th>
+      <th>car_access_quartile</th>
+      <th>public_access_quartile</th>
+      <th>car_grade</th>
+      <th>public_transport_grade</th>
+      <th>overall_assessment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>Арсеньевский район</td>
+      <td>3.5</td>
+      <td>0.35</td>
+      <td>0.00</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4</td>
+      <td>4</td>
+      <td>1.0</td>
+      <td>0.35</td>
+      <td>0.675</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>POLYGON ((36.47061 53.63576, 36.48947 53.63114...</td>
+      <td>Арсеньевский район</td>
+      <td>3.0</td>
+      <td>0.70</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>0.70</td>
+      <td>0.350</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>POLYGON ((36.63005 53.72754, 36.63174 53.72702...</td>
+      <td>Арсеньевский район</td>
+      <td>3.0</td>
+      <td>0.35</td>
+      <td>0.00</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>0.35</td>
+      <td>0.175</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>Белевский район</td>
+      <td>3.5</td>
+      <td>0.70</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4</td>
+      <td>4</td>
+      <td>1.0</td>
+      <td>0.70</td>
+      <td>0.850</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>POLYGON ((36.1455 53.80533, 36.14561 53.80468,...</td>
+      <td>Белевский район</td>
+      <td>3.5</td>
+      <td>0.70</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4</td>
+      <td>4</td>
+      <td>1.0</td>
+      <td>0.70</td>
+      <td>0.850</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>79</th>
+      <td>POLYGON ((37.17494 54.04491, 37.1757 54.0431, ...</td>
+      <td>Щекинский район</td>
+      <td>5.0</td>
+      <td>0.70</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>5.0</td>
+      <td>3.50</td>
+      <td>4.250</td>
+    </tr>
+    <tr>
+      <th>80</th>
+      <td>POLYGON ((37.66036 54.50418, 37.67147 54.4978,...</td>
+      <td>Ясногорский район</td>
+      <td>4.5</td>
+      <td>0.80</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.1</td>
+      <td>2</td>
+      <td>3</td>
+      <td>4.0</td>
+      <td>2.40</td>
+      <td>3.200</td>
+    </tr>
+    <tr>
+      <th>81</th>
+      <td>POLYGON ((37.60388 54.56328, 37.60784 54.55777...</td>
+      <td>Ясногорский район</td>
+      <td>5.0</td>
+      <td>0.80</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.1</td>
+      <td>2</td>
+      <td>3</td>
+      <td>4.0</td>
+      <td>2.40</td>
+      <td>3.200</td>
+    </tr>
+    <tr>
+      <th>82</th>
+      <td>POLYGON ((37.47214 54.48182, 37.47222 54.48006...</td>
+      <td>Ясногорский район</td>
+      <td>5.0</td>
+      <td>0.80</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.1</td>
+      <td>2</td>
+      <td>3</td>
+      <td>4.0</td>
+      <td>2.40</td>
+      <td>3.200</td>
+    </tr>
+    <tr>
+      <th>83</th>
+      <td>POLYGON ((37.68687 54.71385, 37.69127 54.71262...</td>
+      <td>Ясногорский район</td>
+      <td>4.5</td>
+      <td>0.80</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.0</td>
+      <td>0.1</td>
+      <td>2</td>
+      <td>3</td>
+      <td>4.0</td>
+      <td>2.40</td>
+      <td>3.200</td>
+    </tr>
+  </tbody>
+</table>
+<p>84 rows × 13 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import matplotlib.pyplot as plt
+
+cols = [&quot;grade&quot;, &quot;overall_assessment&quot;, &quot;car_grade&quot;, &quot;public_transport_grade&quot;]
+titles = [&quot;Grade&quot;, &quot;Overall Assessment&quot;, &quot;Car Grade&quot;, &quot;Public Transport Grade&quot;]
+
+fig, axes = plt.subplots(2, 2, figsize=(18, 14))
+axes = axes.ravel()
+
+for ax, col, title in zip(axes, cols, titles):
+    plot_kwargs = dict(
+        column=col,
+        cmap=&quot;RdYlGn&quot;,
+        legend=True,
+        linewidth=0.2,
+        ax=ax,
+    )
+
+    if col == &quot;grade&quot;:
+        plot_kwargs.update(vmin=0, vmax=5)
+
+    criteria_gdf.plot(**plot_kwargs)
+    ax.set_axis_off()
+    ax.set_title(title)
+
+plt.tight_layout()
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_3_criteria_21_0.png" src="../_images/examples_3_criteria_21_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="2_indicators.html" class="btn btn-neutral float-left" title="Indicators calculation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="4_road_adder.html" class="btn btn-neutral float-right" title="Adding roads to the graph" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

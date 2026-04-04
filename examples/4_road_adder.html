@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adding roads to the graph &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API documentation" href="../api/index.html" />
+    <link rel="prev" title="Territory grade and criteria" href="3_criteria.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_graph_frame_creation.html">Graph creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_indicators.html">Indicators calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_criteria.html">Territory grade and criteria</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Adding roads to the graph</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Initialization">Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Road-addition">Road addition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Check-connectivity-improvement">Check connectivity improvement</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Adding roads to the graph</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/4_road_adder.nblink.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Adding-roads-to-the-graph">
+<h1>Adding roads to the graph<a class="headerlink" href="#Adding-roads-to-the-graph" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import geopandas as gpd
+
+import os
+os.getcwd()
+
+import pickle
+</pre></div>
+</div>
+</div>
+<section id="Initialization">
+<h2>Initialization<a class="headerlink" href="#Initialization" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>local_crs = 32637 # Tula region crs
+</pre></div>
+</div>
+</div>
+<p>The graph can be obtained by <code class="docutils literal notranslate"><span class="pre">transport_frames.graph.get_graph()</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with open(&quot;data/G_drive.pickle&quot;, &quot;rb&quot;) as f:
+    G_drive = pickle.load(f)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from transport_frames.utils.helper_funcs import plot_graph
+
+plot_graph(G_drive)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_4_road_adder_6_0.png" src="../_images/examples_4_road_adder_6_0.png" />
+</div>
+</div>
+<p>Load a file with the roads to add. They must contain <code class="docutils literal notranslate"><span class="pre">ref_type</span></code> and <code class="docutils literal notranslate"><span class="pre">reg</span></code> parameter</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>new_roads = gpd.read_file(&quot;data/new_road_tula_region.geojson&quot;)
+new_roads
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>maxspeed</th>
+      <th>highway</th>
+      <th>ref</th>
+      <th>reg</th>
+      <th>node_start</th>
+      <th>node_end</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1000.0</td>
+      <td>None</td>
+      <td>None</td>
+      <td>1</td>
+      <td>None</td>
+      <td>None</td>
+      <td>LINESTRING (390444.88 6012584.465, 390410.011 ...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plot_graph(edges = new_roads)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_4_road_adder_9_0.png" src="../_images/examples_4_road_adder_9_0.png" />
+</div>
+</div>
+</section>
+<section id="Road-addition">
+<h2>Road addition<a class="headerlink" href="#Road-addition" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from transport_frames.road_adder import add_roads
+
+new_road_graph = add_roads(G_drive, new_roads, local_crs)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plot_graph(new_road_graph)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_4_road_adder_12_0.png" src="../_images/examples_4_road_adder_12_0.png" />
+</div>
+</div>
+</section>
+<section id="Check-connectivity-improvement">
+<h2>Check connectivity improvement<a class="headerlink" href="#Check-connectivity-improvement" title="Permalink to this heading"></a></h2>
+<p>To see difference in travel time with new roads</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>settlement_points = gpd.read_file(&quot;data/tula_region_towns.geojson&quot;)
+settlement_polygons = gpd.read_file(&quot;data/tula_region_municipalities.geojson&quot;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from transport_frames.indicators import get_connectivity
+
+con_old = get_connectivity(settlement_points,settlement_polygons,local_crs,graph = G_drive)
+con_old.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-05 00:26:17.418 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>connectivity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Манаенское</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>145.007980</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Астаповское</td>
+      <td>POLYGON ((36.47061 53.63576, 36.48947 53.63114...</td>
+      <td>130.750246</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Арсеньево</td>
+      <td>POLYGON ((36.63005 53.72754, 36.63174 53.72702...</td>
+      <td>118.799943</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Левобережное</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>159.656568</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Правобережное</td>
+      <td>POLYGON ((36.1455 53.80533, 36.14561 53.80468,...</td>
+      <td>153.267224</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>con_new = get_connectivity(settlement_points,settlement_polygons,local_crs,graph = new_road_graph)
+con_new.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-05 00:26:37.405 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31940 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>connectivity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Манаенское</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>140.871501</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Астаповское</td>
+      <td>POLYGON ((36.47061 53.63576, 36.48947 53.63114...</td>
+      <td>126.899580</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Арсеньево</td>
+      <td>POLYGON ((36.63005 53.72754, 36.63174 53.72702...</td>
+      <td>115.505683</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Левобережное</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>156.128797</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Правобережное</td>
+      <td>POLYGON ((36.1455 53.80533, 36.14561 53.80468,...</td>
+      <td>149.911153</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+cmp = con_old[[&quot;geometry&quot;, &quot;connectivity&quot;]].rename(
+    columns={&quot;connectivity&quot;: &quot;connectivity_old&quot;}
+).join(
+    con_new[[&quot;connectivity&quot;]].rename(columns={&quot;connectivity&quot;: &quot;connectivity_new&quot;}),
+    how=&quot;inner&quot;,
+)
+
+
+cmp[&quot;delta&quot;] = cmp[&quot;connectivity_new&quot;] - cmp[&quot;connectivity_old&quot;]
+
+eps = 1e-9
+cmp[&quot;change&quot;] = np.select(
+    [cmp[&quot;delta&quot;] &lt; -eps, cmp[&quot;delta&quot;] &gt; eps],
+    [&quot;decreased&quot;, &quot;increased&quot;],
+    default=&quot;unchanged&quot;,
+)
+
+vmin = min(cmp[&quot;connectivity_old&quot;].min(), cmp[&quot;connectivity_new&quot;].min())
+vmax = max(cmp[&quot;connectivity_old&quot;].max(), cmp[&quot;connectivity_new&quot;].max())
+
+fig, ax = plt.subplots(1, 3, figsize=(24, 8))
+
+cmp.plot(
+    column=&quot;connectivity_old&quot;,
+    cmap=&quot;RdYlGn_r&quot;,
+    legend=True,
+    linewidth=0.2,
+    edgecolor=&quot;white&quot;,
+    vmin=vmin,
+    vmax=vmax,
+    ax=ax[0],
+    aspect=&quot;auto&quot;,
+)
+ax[0].set_title(&quot;Connectivity (old), min&quot;)
+ax[0].set_axis_off()
+
+cmp.plot(
+    column=&quot;connectivity_new&quot;,
+    cmap=&quot;RdYlGn_r&quot;,
+    legend=True,
+    linewidth=0.2,
+    edgecolor=&quot;white&quot;,
+    vmin=vmin,
+    vmax=vmax,
+    ax=ax[1],
+    aspect=&quot;auto&quot;,
+)
+ax[1].set_title(&quot;Connectivity (new), min&quot;)
+ax[1].set_axis_off()
+
+color_map = {
+    &quot;decreased&quot;: &quot;#2ca25f&quot;,
+    &quot;increased&quot;: &quot;#de2d26&quot;,
+    &quot;unchanged&quot;: &quot;#ffd92f&quot;,
+}
+
+for cls, color in color_map.items():
+    part = cmp[cmp[&quot;change&quot;] == cls]
+    if part.empty:
+        continue
+    part.plot(
+        color=color,
+        linewidth=0.2,
+        edgecolor=&quot;white&quot;,
+        ax=ax[2],
+        aspect=&quot;auto&quot;,
+    )
+
+ax[2].set_title(&quot;Connectivity change (new - old)&quot;)
+ax[2].set_axis_off()
+ax[2].legend(
+    handles=[
+        mpatches.Patch(color=color_map[&quot;decreased&quot;], label=&quot;Time decreased&quot;),
+        mpatches.Patch(color=color_map[&quot;increased&quot;], label=&quot;Time increased&quot;),
+        mpatches.Patch(color=color_map[&quot;unchanged&quot;], label=&quot;No change&quot;),
+    ],
+    loc=&quot;lower left&quot;,
+)
+
+plt.tight_layout()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_4_road_adder_17_0.png" src="../_images/examples_4_road_adder_17_0.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="3_criteria.html" class="btn btn-neutral float-left" title="Territory grade and criteria" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/index.html" class="btn btn-neutral float-right" title="API documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

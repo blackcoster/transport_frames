@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.graph &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/index.html">API documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">transport_frames.graph</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for transport_frames.graph</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Module for creating city network graph from polygon &quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Real</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">iduedu</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">momepy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">osmnx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ox</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">transport_frames.utils.helper_funcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSchema</span><span class="p">,</span> <span class="n">convert_geometry_from_wkt</span>
+
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+
+
+<span class="n">_CATEGORY_TO_REG</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;federal&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;regional&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="PolygonSchema"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.graph.html#transport_frames.graph.PolygonSchema">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PolygonSchema</span><span class="p">(</span><span class="n">BaseSchema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schema for validating polygons.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    _geom_types : list</span>
+<span class="sd">        List of allowed geometry types for the blocks, default is [shapely.Polygon]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_geom_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_graph"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.graph.html#transport_frames.graph.get_graph">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_graph</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">osm_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">territory</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">buffer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3000</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collect a drive graph from OSM relation id or input territory.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    osm_id : int | None, optional</span>
+<span class="sd">        OSM relation id. If provided, territory is downloaded from OSM by id.</span>
+<span class="sd">    territory : gpd.GeoDataFrame | None, optional</span>
+<span class="sd">        Territory boundary as GeoDataFrame.</span>
+<span class="sd">    local_crs : int | None, optional</span>
+<span class="sd">        Local projection CRS. If None, estimated from territory via `estimate_utm_crs()`.</span>
+<span class="sd">    buffer : int, optional</span>
+<span class="sd">        Buffer distance (meters) used before graph download.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nx.MultiDiGraph</span>
+<span class="sd">        Region network drive graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">osm_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">territory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide either `osm_id` or `territory`.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">osm_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">territory</span> <span class="o">=</span> <span class="n">ox</span><span class="o">.</span><span class="n">geocode_to_gdf</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;R</span><span class="si">{</span><span class="n">osm_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">by_osmid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">territory</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;`territory` must be GeoDataFrame.&quot;</span><span class="p">)</span>
+
+    <span class="n">local_crs</span> <span class="o">=</span> <span class="n">territory</span><span class="o">.</span><span class="n">estimate_utm_crs</span><span class="p">()</span>
+    
+    <span class="n">polygon_gdf</span> <span class="o">=</span> <span class="n">PolygonSchema</span><span class="p">(</span><span class="n">territory</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">local_crs</span><span class="p">))</span>
+    <span class="n">polygon_geom</span> <span class="o">=</span> <span class="n">polygon_gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">union_all</span><span class="p">()</span>
+    <span class="n">polygon_with_buf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">([{</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">polygon_geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffer</span><span class="p">)}],</span> <span class="n">crs</span><span class="o">=</span><span class="n">local_crs</span><span class="p">)</span>
+    <span class="n">polygon_geometry_with_buf</span> <span class="o">=</span> <span class="n">polygon_with_buf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">union_all</span><span class="p">()</span>
+
+    <span class="n">G_drive</span> <span class="o">=</span> <span class="n">iduedu</span><span class="o">.</span><span class="n">get_drive_graph</span><span class="p">(</span>
+        <span class="n">territory</span><span class="o">=</span><span class="n">polygon_geometry_with_buf</span><span class="p">,</span>
+        <span class="n">add_road_category</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">osm_edge_tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;maxspeed&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;ref&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">G_drive</span> <span class="o">=</span> <span class="n">_ensure_reg_attr</span><span class="p">(</span><span class="n">G_drive</span><span class="p">)</span>
+    <span class="n">G_drive</span> <span class="o">=</span> <span class="n">_crop_edges_by_polygon</span><span class="p">(</span><span class="n">G_drive</span><span class="p">,</span> <span class="n">polygon_gdf</span><span class="p">)</span>
+    <span class="n">G_drive</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">local_crs</span>
+    <span class="n">G_drive</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="s2">&quot;approach&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;primal&quot;</span>
+    <span class="n">G_drive</span> <span class="o">=</span> <span class="n">classify_nodes</span><span class="p">(</span><span class="n">G_drive</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">G_drive</span></div>
+
+
+<div class="viewcode-block" id="get_intermodal_graph"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.graph.html#transport_frames.graph.get_intermodal_graph">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_intermodal_graph</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">osm_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">territory</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collect an intermodal graph (public transport + walking) from OSM id or territory.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    osm_id : int | None, optional</span>
+<span class="sd">        OSM relation id. If provided, territory is downloaded from OSM by id.</span>
+<span class="sd">    territory : gpd.GeoDataFrame | None, optional</span>
+<span class="sd">        Territory boundary as GeoDataFrame.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nx.MultiDiGraph</span>
+<span class="sd">        Intermodal graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">osm_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">territory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide exactly one of `osm_id` or `territory`.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">osm_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">G_int</span> <span class="o">=</span> <span class="n">iduedu</span><span class="o">.</span><span class="n">get_intermodal_graph</span><span class="p">(</span><span class="n">osm_id</span><span class="o">=</span><span class="n">osm_id</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">G_int</span> <span class="o">=</span> <span class="n">iduedu</span><span class="o">.</span><span class="n">get_intermodal_graph</span><span class="p">(</span><span class="n">territory</span><span class="o">=</span><span class="n">territory</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">G_int</span></div>
+
+
+<div class="viewcode-block" id="_category_to_reg"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.graph.html#transport_frames.graph._category_to_reg">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_category_to_reg</span><span class="p">(</span><span class="n">category</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert iduedu road category into legacy numeric reg code.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">category</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+        <span class="n">regs</span> <span class="o">=</span> <span class="p">[</span><span class="n">_category_to_reg</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">category</span><span class="p">]</span>
+        <span class="n">regs</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">regs</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">regs</span><span class="p">)</span> <span class="k">if</span> <span class="n">regs</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_CATEGORY_TO_REG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">category</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="_ensure_reg_attr"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.graph.html#transport_frames.graph._ensure_reg_attr">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_ensure_reg_attr</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ensure every edge has numeric `reg` attribute derived from `category` if needed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reg&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}:</span>
+            <span class="k">continue</span>
+
+        <span class="n">mapped_reg</span> <span class="o">=</span> <span class="n">_category_to_reg</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">mapped_reg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;reg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapped_reg</span>
+
+    <span class="k">return</span> <span class="n">graph</span></div>
+
+
+<div class="viewcode-block" id="classify_nodes"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.graph.html#transport_frames.graph.classify_nodes">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">classify_nodes</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assigns reg_status to nodes based on edge data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    graph : nx.MultiDiGraph</span>
+<span class="sd">        The road network graph with classified edges</span>
+
+<span class="sd">    Returns  </span>
+<span class="sd">    --------</span>
+<span class="sd">    nx.MultiDiGraph</span>
+<span class="sd">        City network drive graph with classified nodes and edges</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;reg_1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="s2">&quot;reg_2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reg&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">u</span><span class="p">][</span><span class="s2">&quot;reg_1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="s2">&quot;reg_1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reg&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">u</span><span class="p">][</span><span class="s2">&quot;reg_2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="s2">&quot;reg_2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">graph</span></div>
+
+
+<div class="viewcode-block" id="_crop_edges_by_polygon"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.graph.html#transport_frames.graph._crop_edges_by_polygon">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_crop_edges_by_polygon</span><span class="p">(</span><span class="n">graph</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">,</span> <span class="n">polygon</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates edge geometries based on intersections with the city boundary.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    graph : nx.MultiDiGraph</span>
+<span class="sd">        The city network graph</span>
+<span class="sd">    polygon : Polygon</span>
+<span class="sd">        The Polygon to crop edges with</span>
+
+<span class="sd">    Returns  </span>
+<span class="sd">    ---------</span>
+<span class="sd">    nx.MultiDiGraph</span>
+<span class="sd">        City network drive graph with cropped edges</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">momepy</span><span class="o">.</span><span class="n">nx_to_gdf</span><span class="p">(</span><span class="n">graph</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">city_transformed</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">edges</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">edges</span><span class="p">[</span><span class="s2">&quot;intersections&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">city_transformed</span><span class="o">.</span><span class="n">unary_union</span><span class="p">)</span>
+    <span class="n">edges</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="s2">&quot;intersections&quot;</span><span class="p">]</span>
+
+    <span class="n">edges</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;intersections&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span><span class="n">index_parts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="o">~</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">is_empty</span><span class="p">]</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;LineString&quot;</span><span class="p">]</span>
+
+    <span class="n">nodes_coord</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">edges</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">start_node</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;node_start&quot;</span><span class="p">]</span>
+        <span class="n">end_node</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;node_end&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">start_node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes_coord</span><span class="p">:</span>
+            <span class="n">nodes_coord</span><span class="p">[</span><span class="n">start_node</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="k">if</span> <span class="n">end_node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes_coord</span><span class="p">:</span>
+            <span class="n">nodes_coord</span><span class="p">[</span><span class="n">end_node</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">}</span>
+
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">_create_graph</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">nodes_coord</span><span class="p">)</span>
+    <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">nodes_coord</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">convert_node_labels_to_integers</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">convert_geometry_from_wkt</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">graph</span></div>
+
+
+
+<div class="viewcode-block" id="_create_graph"><a class="viewcode-back" href="../../api/_autosummary/transport_frames.graph.html#transport_frames.graph._create_graph">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">_create_graph</span><span class="p">(</span><span class="n">edges</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">nodes_coord</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a graph based on edges and node coordinates.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    edges : gpd.GeoDataFrame: </span>
+<span class="sd">        The edges with their attributes and geometries</span>
+<span class="sd">    nodes_coord : dict </span>
+<span class="sd">        A dictionary containing node coordinates</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    nx.MultiDiGraph </span>
+<span class="sd">        The constructed graph</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">MultiDiGraph</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">node_start</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">node_end</span><span class="p">)</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">LineString</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="p">(</span><span class="n">nodes_coord</span><span class="p">[</span><span class="n">p1</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">nodes_coord</span><span class="p">[</span><span class="n">p1</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
+                        <span class="p">(</span><span class="n">nodes_coord</span><span class="p">[</span><span class="n">p2</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="n">nodes_coord</span><span class="p">[</span><span class="n">p2</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]),</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">edge</span><span class="o">.</span><span class="n">geometry</span>
+            <span class="k">else</span> <span class="n">edge</span><span class="o">.</span><span class="n">geometry</span>
+        <span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;node_start&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;node_end&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;intersections&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Avoid passing MultiDiGraph edge key as kwarg by accident.</span>
+        <span class="n">attrs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">geom</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;length_meter&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
+
+        <span class="n">speed_mpm</span> <span class="o">=</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;speed_mpm&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">speed_mpm</span><span class="p">,</span> <span class="n">Real</span><span class="p">)</span> <span class="ow">and</span> <span class="n">speed_mpm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;time_min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">length</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">speed_mpm</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">G</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

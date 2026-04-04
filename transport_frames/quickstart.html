@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quickstart &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Examples" href="../examples/index.html" />
+    <link rel="prev" title="Transport_frames" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Transport_frames</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Quickstart</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-use">How to use</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Transport_frames</a></li>
+      <li class="breadcrumb-item active">Quickstart</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/transport_frames/quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quickstart">
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading"></a></h1>
+<p>Transport_frames quick start guide</p>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this heading"></a></h2>
+<p><strong>Transport Frames</strong> is a Python library designed for spatial transport analysis, offering tools to:</p>
+<ul class="simple">
+<li><p>Generate <strong>transport frames</strong> based on drive graphs.</p></li>
+<li><p>Identify <strong>priority roads</strong> by evaluating the expected popularity of routes between exit pairs.</p></li>
+<li><p>Update drive graphs with new road connections, ensuring proper integration.</p></li>
+<li><p>Grade <strong>territory polygons</strong> by analyzing distances to federal and regional roads.</p></li>
+<li><p>Compute a <strong>weighted connectivity score</strong> for a region based on accessibility to transport services and road network quality.</p></li>
+<li><p>Interpret accessibility scores into textual descriptions.</p></li>
+<li><p>Aggregate <strong>administrative-level statistics</strong> by computing transport indicators at different spatial scales (regions, districts, etc.).</p></li>
+<li><p>Analyze <strong>territory-specific indicators</strong> by using buffer-based calculations around the center of a given territory.</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p><strong>Transport_frames</strong> can be installed with <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">transport</span><span class="o">-</span><span class="n">frames</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-use">
+<h2>How to use<a class="headerlink" href="#how-to-use" title="Permalink to this heading"></a></h2>
+<p>For the detailed tutorial on usage case see our examples.</p>
+<p>The following <strong>Jupyter Notebooks</strong> illustrate core library functions:</p>
+<ol class="arabic simple">
+<li><p><strong>Graph Frame Creation</strong> → <a class="reference external" href="examples/1_graph_frame_creation.ipynb">1_graph_frame_creation.ipynb</a>
+- Created graph from territory polygon.
+- Generates transport frames from drive graphs.
+- Identifies priority roads using network analysis.</p></li>
+<li><p><strong>Indicator Computation</strong> → <a class="reference external" href="examples/2_indicators.ipynb">2_indicators.ipynb</a>
+- Computes transport indicators (road density, connectivity, admin center distances, etc.).
+- Aggregates statistics at area and territory levels.</p></li>
+<li><p><strong>Territory grading</strong> → <a class="reference external" href="examples/3_criteria.ipynb">3_criteria.ipynb</a>
+- Assigns territory scores based on federal and regional roads accessibility.
+- Analyzes proximity to key infrastructure (bus stops, ports, airports).
+- Analyzes connectivity metrics of the territory.
+- Converts numeric scores into textual interpretations.</p></li>
+<li><p><strong>Road Graph Updates</strong> → <a class="reference external" href="examples/4_road_adder.ipynb">4_road_adder.ipynb</a>
+- Updates transport graphs with new roads and edges.
+- Analyzes connectivity improvement after graph modifications.</p></li>
+<li><p><strong>Transport Provision</strong> → <a class="reference external" href="examples/5_transport_provision.ipynb">5_transport_provision.ipynb</a>
+- Calculates a transport provision index for each territory polygon.
+- Combines road and railway density, airport accessibility, and settlement area share into one metric.</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Transport_frames" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../examples/index.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

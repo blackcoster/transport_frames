@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.criteria &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="transport_frames.indicators" href="transport_frames.indicators.html" />
+    <link rel="prev" title="transport_frames.frame" href="transport_frames.frame.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.graph.html">transport_frames.graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.frame.html">transport_frames.frame</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">transport_frames.criteria</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.PolygonSchema"><code class="docutils literal notranslate"><span class="pre">PolygonSchema</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.criteria.PolygonSchema.name"><code class="docutils literal notranslate"><span class="pre">PolygonSchema.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.criteria.PolygonSchema.Config"><code class="docutils literal notranslate"><span class="pre">PolygonSchema.Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.PointSchema"><code class="docutils literal notranslate"><span class="pre">PointSchema</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.criteria.PointSchema.Config"><code class="docutils literal notranslate"><span class="pre">PointSchema.Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.grade_territory"><code class="docutils literal notranslate"><span class="pre">grade_territory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria._grade_polygon"><code class="docutils literal notranslate"><span class="pre">_grade_polygon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.find_median"><code class="docutils literal notranslate"><span class="pre">find_median()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.weight_territory"><code class="docutils literal notranslate"><span class="pre">weight_territory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria._get_nearest_distances"><code class="docutils literal notranslate"><span class="pre">_get_nearest_distances()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.calculate_quartiles"><code class="docutils literal notranslate"><span class="pre">calculate_quartiles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.assign_grades"><code class="docutils literal notranslate"><span class="pre">assign_grades()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.get_criteria"><code class="docutils literal notranslate"><span class="pre">get_criteria()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.interpret_gdf"><code class="docutils literal notranslate"><span class="pre">interpret_gdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.criteria.interpretation"><code class="docutils literal notranslate"><span class="pre">interpretation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.indicators.html">transport_frames.indicators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.road_adder.html">transport_frames.road_adder</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API documentation</a></li>
+      <li class="breadcrumb-item active">transport_frames.criteria</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/transport_frames.criteria.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-transport_frames.criteria">
+<span id="transport-frames-criteria"></span><h1>transport_frames.criteria<a class="headerlink" href="#module-transport_frames.criteria" title="Permalink to this heading"></a></h1>
+<p>Module for getting grade and criteroa of territories</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.criteria.assign_grades" title="transport_frames.criteria.assign_grades"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assign_grades</span></code></a>(graded_territories, ...)</p></td>
+<td><p>Assign accessibility-based grades to territories.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.criteria.calculate_quartiles" title="transport_frames.criteria.calculate_quartiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_quartiles</span></code></a>(df, column)</p></td>
+<td><p>Calculate quartile rankings for a given column in a DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.criteria.find_median" title="transport_frames.criteria.find_median"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_median</span></code></a>(city_points, adj_mx)</p></td>
+<td><p>Compute the median travel time from each city to all other cities.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.criteria.get_criteria" title="transport_frames.criteria.get_criteria"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_criteria</span></code></a>(graded_terr, towns, polygons[, ...])</p></td>
+<td><p>Compute criteria scores for graded territories based on transport accessibility.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.criteria.grade_territory" title="transport_frames.criteria.grade_territory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grade_territory</span></code></a>(frame, gdf_poly[, ...])</p></td>
+<td><p>Grade territories based on proximity to key transport infrastructure.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.criteria.interpret_gdf" title="transport_frames.criteria.interpret_gdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpret_gdf</span></code></a>(gdf)</p></td>
+<td><p>Interprets geographic accessibility data for each criterion in the criteria DataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.criteria.interpretation" title="transport_frames.criteria.interpretation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpretation</span></code></a>(grade, weight_r_stops, ...)</p></td>
+<td><p>Generate a textual interpretation of an area's transport accessibility.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.criteria.weight_territory" title="transport_frames.criteria.weight_territory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weight_territory</span></code></a>(territories, railway_stops, ...)</p></td>
+<td><p>Assign weights to territories based on accessibility to key transport services.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.criteria.PointSchema" title="transport_frames.criteria.PointSchema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSchema</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Schema for validating points.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.criteria.PolygonSchema" title="transport_frames.criteria.PolygonSchema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PolygonSchema</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Schema for validating polygons.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.criteria.PolygonSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">PolygonSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#PolygonSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.PolygonSchema" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code></p>
+<p>Schema for validating polygons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name pf the polygon. Default to None</p></li>
+<li><p><strong>_geom_types</strong> (<em>list</em>) – List of allowed geometry types for the points, default is [shapely.Point]</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.criteria.PolygonSchema.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Series</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'name'</span></em><a class="headerlink" href="#transport_frames.criteria.PolygonSchema.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.criteria.PolygonSchema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#transport_frames.criteria.PolygonSchema.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.criteria.PolygonSchema.Config.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PolygonSchema'</span></em><a class="headerlink" href="#transport_frames.criteria.PolygonSchema.Config.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.criteria.PointSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">PointSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#PointSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.PointSchema" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code></p>
+<p>Schema for validating points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_geom_types</strong> (<em>list</em>) – List of allowed geometry types for the points, default is [shapely.Point]</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.criteria.PointSchema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#transport_frames.criteria.PointSchema.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.criteria.PointSchema.Config.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PointSchema'</span></em><a class="headerlink" href="#transport_frames.criteria.PointSchema.Config.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria.grade_territory">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">grade_territory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdf_poly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#grade_territory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.grade_territory" title="Permalink to this definition"></a></dt>
+<dd><p>Grade territories based on proximity to key transport infrastructure.</p>
+<p>This function evaluates territories by computing distances to major road
+networks (reg1, reg2), edges, and priority roads. The grading system assigns
+scores based on proximity thresholds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame</strong> (<em>nx.MultiDiGraph</em>) – The transport network graph containing road connections.</p></li>
+<li><p><strong>gdf_poly</strong> (<em>gpd.GeoDataFrame</em>) – A GeoDataFrame containing the polygons of the territories to be graded.</p></li>
+<li><p><strong>include_priority</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include priority road networks in the grading system (default: True).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A GeoDataFrame containing the graded territories with an added ‘grade’ column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria._grade_polygon">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">_grade_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_priority</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#_grade_polygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria._grade_polygon" title="Permalink to this definition"></a></dt>
+<dd><p>Compute a grade for a territory based on its distances to transport infrastructure.</p>
+<p>The grading system follows predefined thresholds for distances to key
+road networks and priority transport corridors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> (<em>gpd.GeoDataFrame</em>) – A single row from the territory GeoDataFrame, containing distance metrics.</p></li>
+<li><p><strong>include_priority</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to consider priority road networks in the grading system (default: True).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The computed grade for the given territory.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria.find_median">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">find_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">city_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj_mx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#find_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.find_median" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the median travel time from each city to all other cities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>city_points</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing city locations.</p></li>
+<li><p><strong>adj_mx</strong> (<em>pd.DataFrame</em>) – Adjacency matrix representing pairwise travel times between cities.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated city points with a ‘to_service’ column representing median travel times.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria.weight_territory">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">weight_territory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">territories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">railway_stops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bus_stops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ferry_stops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airports</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#weight_territory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.weight_territory" title="Permalink to this definition"></a></dt>
+<dd><p>Assign weights to territories based on accessibility to key transport services.</p>
+<p>This function calculates accessibility scores for each territory based on
+distances to railway stops, bus stops, ferry terminals, and airports.
+A weighted sum is computed using predefined importance coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>territories</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing territory geometries.</p></li>
+<li><p><strong>railway_stops</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of railway stops.</p></li>
+<li><p><strong>bus_stops</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of bus stops.</p></li>
+<li><p><strong>ferry_stops</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of ferry terminals.</p></li>
+<li><p><strong>airports</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of airport locations.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em>) – Coordinate reference system to be used for spatial calculations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Territories GeoDataFrame with assigned accessibility weights.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria._get_nearest_distances">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">_get_nearest_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">territories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#_get_nearest_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria._get_nearest_distances" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the nearest distance between each territory and a set of transport stops.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>territories</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing the territory geometries.</p></li>
+<li><p><strong>stops</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing the stop locations.</p></li>
+<li><p><strong>distance_col</strong> (<em>str</em>) – The name of the column where computed distances will be stored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Territories GeoDataFrame updated with nearest distances to stops.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria.calculate_quartiles">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">calculate_quartiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Series</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#calculate_quartiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.calculate_quartiles" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate quartile rankings for a given column in a DataFrame.</p>
+<p>This function divides the values of the specified column into four quartiles
+and assigns ranks from 1 to 4, where 1 represents the lowest quartile
+and 4 represents the highest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – The DataFrame containing the column to be ranked.</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – The name of the column for which quartiles should be calculated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas Series with assigned quartile ranks (1 to 4) for each row.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria.assign_grades">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">assign_grades</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graded_territories</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accessibility_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#assign_grades"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.assign_grades" title="Permalink to this definition"></a></dt>
+<dd><p>Assign accessibility-based grades to territories.</p>
+<p>This function assigns grades based on quartile rankings of car and
+public transport accessibility within the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graded_territories</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing already graded territories.</p></li>
+<li><p><strong>accessibility_data</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame with accessibility metrics.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em>) – Coordinate reference system for spatial consistency.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated territories with assigned transport accessibility grades.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria.get_criteria">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">get_criteria</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graded_terr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">towns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drive_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PT_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_stops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_stops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ferry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aero</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj_mx_drive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj_mx_PT</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_crs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3857</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#get_criteria"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.get_criteria" title="Permalink to this definition"></a></dt>
+<dd><p>Compute criteria scores for graded territories based on transport accessibility.</p>
+<p>This function evaluates the connectivity and accessibility of territories
+by calculating travel times, distance-based weights, and spatial join operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graded_terr</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of graded territories.</p></li>
+<li><p><strong>points</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of city and settlement points.</p></li>
+<li><p><strong>polygons</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame containing area boundaries for spatial joins.</p></li>
+<li><p><strong>drive_graph</strong> (<em>nx.MultiDiGraph</em><em>, </em><em>optional</em>) – MultiDiGraph representing the drive network.</p></li>
+<li><p><strong>PT_graph</strong> (<em>nx.MultiDiGraph</em><em>, </em><em>optional</em>) – MultiDiGraph representing the public transport network.</p></li>
+<li><p><strong>r_stops</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame of railway stops.</p></li>
+<li><p><strong>b_stops</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame of bus stops.</p></li>
+<li><p><strong>ferry</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame of ferry stops.</p></li>
+<li><p><strong>aero</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame of airports.</p></li>
+<li><p><strong>adj_mx_drive</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – Adjacency matrix for road travel.</p></li>
+<li><p><strong>adj_mx_PT</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – Adjacency matrix for public transport.</p></li>
+<li><p><strong>local_crs</strong> (<em>int</em><em>, </em><em>optional</em>) – Coordinate reference system for spatial calculations (default: 3857).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>GeoDataFrame containing computed transport criteria scores for each territory.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria.interpret_gdf">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">interpret_gdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#interpret_gdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.interpret_gdf" title="Permalink to this definition"></a></dt>
+<dd><p>Interprets geographic accessibility data for each criterion in the criteria DataFrame.</p>
+<p>This method iterates through the criteria DataFrame, extracts relevant weights and quartiles for
+each criterion, and generates an interpretation of the accessibility based on transport services
+availability and accessibility quartiles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf</strong> (<em>gpd.GeoDataGrame</em>) – gdf with pre-calculated criteria</p></li>
+<li><p><strong>Returns</strong> – </p></li>
+<li><p><strong>--------</strong> – <dl class="simple">
+<dt>list: A list of tuples, each containing the name of the criterion and its corresponding</dt><dd><p>interpretation as a list of strings.</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.criteria.interpretation">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.criteria.</span></span><span class="sig-name descname"><span class="pre">interpretation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grade</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_r_stops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_b_stops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_ferry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_aero</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">car_access_quartile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">public_access_quartile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../../_modules/transport_frames/criteria.html#interpretation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.criteria.interpretation" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a textual interpretation of an area’s transport accessibility.</p>
+<p>This function evaluates an area’s accessibility by analyzing transport services
+(rail stops, bus stops, ferry services, and airports) and accessibility quartiles
+(for car and public transport). The result is a structured textual interpretation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grade</strong> (<em>int</em>) – The grade of the area, representing its general transport accessibility.</p></li>
+<li><p><strong>weight_r_stops</strong> (<em>float</em>) – Weight indicating the presence of railway stations.</p></li>
+<li><p><strong>weight_b_stops</strong> (<em>float</em>) – Weight indicating the presence of bus stops.</p></li>
+<li><p><strong>weight_ferry</strong> (<em>float</em>) – Weight indicating the presence of ferry terminals.</p></li>
+<li><p><strong>weight_aero</strong> (<em>float</em>) – Weight indicating the presence of airports.</p></li>
+<li><p><strong>car_access_quartile</strong> (<em>int</em>) – Quartile score for car access (0-4), where 0 indicates the worst access and 4 the best.</p></li>
+<li><p><strong>public_access_quartile</strong> (<em>int</em>) – Quartile score for public transport access (0-4), where 0 indicates the worst access and 4 the best.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of strings providing an interpretation of the area’s transport accessibility
+based on its grade, service availability, and quartile scores.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="transport_frames.frame.html" class="btn btn-neutral float-left" title="transport_frames.frame" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="transport_frames.indicators.html" class="btn btn-neutral float-right" title="transport_frames.indicators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

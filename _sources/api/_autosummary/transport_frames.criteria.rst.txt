@@ -1,0 +1,43 @@
+﻿transport\_frames.criteria
+==========================
+
+.. automodule:: transport_frames.criteria
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      assign_grades
+      calculate_quartiles
+      find_median
+      get_criteria
+      grade_territory
+      interpret_gdf
+      interpretation
+      weight_territory
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      PointSchema
+      PolygonSchema
+   
+   
+
+   
+   
+   
+
+
+

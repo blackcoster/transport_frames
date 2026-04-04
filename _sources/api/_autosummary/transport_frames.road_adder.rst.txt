@@ -1,0 +1,38 @@
+﻿transport\_frames.road\_adder
+=============================
+
+.. automodule:: transport_frames.road_adder
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_roads
+      connect_line_to_roads
+      create_nodeID
+      find_end_node
+      find_nearest_node
+      find_nearest_road_point
+      make_edge_data
+      make_node_data
+      modify_graph
+      split_roads
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>transport_frames.frame &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="transport_frames.criteria" href="transport_frames.criteria.html" />
+    <link rel="prev" title="transport_frames.graph" href="transport_frames.graph.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.graph.html">transport_frames.graph</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">transport_frames.frame</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame.PointSchema"><code class="docutils literal notranslate"><span class="pre">PointSchema</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.frame.PointSchema.Config"><code class="docutils literal notranslate"><span class="pre">PointSchema.Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame.CentersSchema"><code class="docutils literal notranslate"><span class="pre">CentersSchema</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.frame.CentersSchema.name"><code class="docutils literal notranslate"><span class="pre">CentersSchema.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transport_frames.frame.CentersSchema.Config"><code class="docutils literal notranslate"><span class="pre">CentersSchema.Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame.get_frame"><code class="docutils literal notranslate"><span class="pre">get_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame._filter_roads"><code class="docutils literal notranslate"><span class="pre">_filter_roads()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame._assign_city_names_to_nodes"><code class="docutils literal notranslate"><span class="pre">_assign_city_names_to_nodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame.mark_exits"><code class="docutils literal notranslate"><span class="pre">mark_exits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame.add_region_attr"><code class="docutils literal notranslate"><span class="pre">add_region_attr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame._filter_polygons_by_buffer"><code class="docutils literal notranslate"><span class="pre">_filter_polygons_by_buffer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame.plot_frame"><code class="docutils literal notranslate"><span class="pre">plot_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame.weigh_roads"><code class="docutils literal notranslate"><span class="pre">weigh_roads()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame._mark_ref_type"><code class="docutils literal notranslate"><span class="pre">_mark_ref_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame._determine_ref_type"><code class="docutils literal notranslate"><span class="pre">_determine_ref_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame._get_weight"><code class="docutils literal notranslate"><span class="pre">_get_weight()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport_frames.frame.plot_weighted_roads"><code class="docutils literal notranslate"><span class="pre">plot_weighted_roads()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.criteria.html">transport_frames.criteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.indicators.html">transport_frames.indicators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transport_frames.road_adder.html">transport_frames.road_adder</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API documentation</a></li>
+      <li class="breadcrumb-item active">transport_frames.frame</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/transport_frames.frame.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-transport_frames.frame">
+<span id="transport-frames-frame"></span><h1>transport_frames.frame<a class="headerlink" href="#module-transport_frames.frame" title="Permalink to this heading"></a></h1>
+<p>Module for creating and weighting transport frame</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.frame.add_region_attr" title="transport_frames.frame.add_region_attr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_region_attr</span></code></a>(n, regions, polygon_buffer)</p></td>
+<td><p>Add a 'border_region' attribute to nodes based on their intersection with region polygons.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.frame.get_frame" title="transport_frames.frame.get_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frame</span></code></a>(graph, admin_centers, ...[, ...])</p></td>
+<td><p>Creates frame from graph.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.frame.mark_exits" title="transport_frames.frame.mark_exits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mark_exits</span></code></a>(frame, area_polygon, ...)</p></td>
+<td><p>Assign the 'exit', 'exit_country' and 'boorder_region' attribute to nodes in a GeoDataFrame based on their intersection with city boundaries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.frame.plot_frame" title="transport_frames.frame.plot_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_frame</span></code></a>(frame[, zoom_out_factor])</p></td>
+<td><p>Plot the transport frame with exit points, city nodes, and categorized roads.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.frame.plot_weighted_roads" title="transport_frames.frame.plot_weighted_roads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_weighted_roads</span></code></a>(weighted_graph[, ...])</p></td>
+<td><p>Visualize a weighted road network on a map.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.frame.weigh_roads" title="transport_frames.frame.weigh_roads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">weigh_roads</span></code></a>(frame[, restricted_terr_gdf])</p></td>
+<td><p>Assigns and normalizes weights for roads in the network based on their proximity to exits.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#transport_frames.frame.CentersSchema" title="transport_frames.frame.CentersSchema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CentersSchema</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Schema for validating central cities.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#transport_frames.frame.PointSchema" title="transport_frames.frame.PointSchema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointSchema</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Schema for validating points.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.frame.PointSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">PointSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/transport_frames/frame.html#PointSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame.PointSchema" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code></p>
+<p>Schema for validating points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_geom_types</strong> (<em>list</em>) – List of allowed geometry types for the points, default is [shapely.Point]</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.frame.PointSchema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#transport_frames.frame.PointSchema.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.frame.PointSchema.Config.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PointSchema'</span></em><a class="headerlink" href="#transport_frames.frame.PointSchema.Config.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.frame.CentersSchema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">CentersSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/transport_frames/frame.html#CentersSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame.CentersSchema" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code></p>
+<p>Schema for validating central cities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>_geom_types</strong> (<em>list</em>) – List of allowed geometry types for the blocks, default is [shapely.Polygon]</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.frame.CentersSchema.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Series</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'name'</span></em><a class="headerlink" href="#transport_frames.frame.CentersSchema.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="transport_frames.frame.CentersSchema.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#transport_frames.frame.CentersSchema.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="transport_frames.frame.CentersSchema.Config.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CentersSchema'</span></em><a class="headerlink" href="#transport_frames.frame.CentersSchema.Config.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame.get_frame">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">get_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">graph:</span> <span class="pre">~networkx.classes.multidigraph.MultiDiGraph,</span> <span class="pre">admin_centers:</span> <span class="pre">~geopandas.geodataframe.GeoDataFrame,</span> <span class="pre">area_polygon:</span> <span class="pre">~geopandas.geodataframe.GeoDataFrame,</span> <span class="pre">region_polygons:</span> <span class="pre">~geopandas.geodataframe.GeoDataFrame,</span> <span class="pre">country_polygon:</span> <span class="pre">~geopandas.geodataframe.GeoDataFrame</span> <span class="pre">=</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">geometry</span>&#160; <span class="pre">...</span>&#160; <span class="pre">display_name</span> <span class="pre">0</span>&#160; <span class="pre">MULTIPOLYGON</span> <span class="pre">(((-180</span> <span class="pre">62.55456,</span> <span class="pre">-179.99326</span> <span class="pre">62.5...</span>&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Russia</span>&#160; <span class="pre">[1</span> <span class="pre">rows</span> <span class="pre">x</span> <span class="pre">17</span> <span class="pre">columns]</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#get_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame.get_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Creates frame from graph. Edges are filtered based on reg [1,2].
+Region point nodes are assigned with ‘city_name’ attribute.
+Points, connecting the roads with other regions or countries are marked with ‘exit’ and ‘exit_country’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – City network graph with classified roads and edges.</p></li>
+<li><p><strong>admin_centers</strong> (<em>gpd.GeoDataFrame</em>) – Administrative region centers points to assign ‘city_name’ attribute</p></li>
+<li><p><strong>region_polygons</strong> (<em>gpd.GeoDataFrame</em>) – Polygons or regions of the country to assign ‘border_region’ attribute to exits</p></li>
+<li><p><strong>country_polygon</strong> (<em>gpd.GeoDataFrame</em>) – Polygon of the country to assign ‘exit_country’ attribute</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Frame of the graph with added ‘city_node’,’exit’,’exit_country’,’border_region’ attributes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame._filter_roads">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">_filter_roads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#_filter_roads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame._filter_roads" title="Permalink to this definition"></a></dt>
+<dd><p>Filters the graph to include only reg_1 and reg_2 roads.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>graph</strong> (<em>nx.MultiDiGraph</em>) – graph with edges, containing ‘reg’ attribute</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Frame of filtered edges with ‘reg’ in [1, 2]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame._assign_city_names_to_nodes">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">_assign_city_names_to_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#_assign_city_names_to_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame._assign_city_names_to_nodes" title="Permalink to this definition"></a></dt>
+<dd><p>Assigns city names to nodes in the graph based on proximity to city centers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<em>gpd.GeoDataFrame</em>) – Region centers points</p></li>
+<li><p><strong>frame</strong> (<em>nx.MultiDiGraph</em>) – Frame of filtered edges with ‘reg’ in [1, 2]</p></li>
+<li><p><strong>max_distance</strong> (<em>int</em>) – Max distance (meters) on which a node can be assigned to a city</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A frame with nodes assigned with ‘city_name’ attribute</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame.mark_exits">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">mark_exits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_polygon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">country_polygon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MultiDiGraph</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#mark_exits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame.mark_exits" title="Permalink to this definition"></a></dt>
+<dd><p>Assign the ‘exit’, ‘exit_country’ and ‘boorder_region’ attribute to nodes
+in a GeoDataFrame based on their intersection with city boundaries.</p>
+<section id="parameters">
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
+<dl class="simple">
+<dt>frame<span class="classifier">nx.MultiDiGraph</span></dt><dd><p>Frame graph</p>
+</dd>
+<dt>area_polygon<span class="classifier">gpd.GeoDataFrame</span></dt><dd><p>GeoDataFrame with boundary of the inverstigated region</p>
+</dd>
+<dt>regions_polygons<span class="classifier">gpd.GeoDataFrame</span></dt><dd><p>GeoDataFrame with polygons of the regions with ‘name’ column</p>
+</dd>
+<dt>country_polygon<span class="classifier">gpd.GeoDataFrame</span></dt><dd><p>GeoDataFrame with boundary of the inverstigated country</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Frame with assigned ‘exit’, ‘exit_country’ and ‘boorder_region’ node attributes</p>
+</dd>
+<dt class="field-even">rtype<span class="colon">:</span></dt>
+<dd class="field-even"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame.add_region_attr">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">add_region_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#add_region_attr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame.add_region_attr" title="Permalink to this definition"></a></dt>
+<dd><p>Add a ‘border_region’ attribute to nodes based on their intersection with region polygons.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>gpd.GeoDataFrame</em>) – Nodes GeoDataFrame with ‘exit’ and ‘exit_country’ attributes</p></li>
+<li><p><strong>regions</strong> (<em>GeoDataFrame</em>) – Regions GeoDataFrame with ‘name’ column</p></li>
+<li><p><strong>polygon_buffer</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of region of interest boundary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated nodes GeoDataFrame with ‘border_region’ attribute</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame._filter_polygons_by_buffer">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">_filter_polygons_by_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_polygons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polygon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#_filter_polygons_by_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame._filter_polygons_by_buffer" title="Permalink to this definition"></a></dt>
+<dd><p>Extract and filter region polygons based on a buffer around a given polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_polygons</strong> (<em>gpd.GeoDataFrame</em>) – Gdf of regions polygons</p></li>
+<li><p><strong>polygon_buffer</strong> (<em>Polygon</em>) – Polygon of the buffer polygon.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>- GeoDataFrame</strong></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Filtered GeoDataFrame of region polygons.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame.plot_frame">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">plot_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_out_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#plot_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame.plot_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the transport frame with exit points, city nodes, and categorized roads.</p>
+<p>The function visualizes the road network using a basemap and styles edges and nodes based on their attributes:</p>
+<ul class="simple">
+<li><p><strong>Edges (Road Segments)</strong>:
+- <cite>reg == 1</cite> → Red (Higher priority roads)
+- <cite>reg == 2</cite> → Blue (Lower priority roads)</p></li>
+<li><p><strong>Nodes (Intersections &amp; Key Points)</strong>:
+- <cite>exit == 1</cite> → Green (Exit points)
+- <cite>exit_country == 1</cite> → Black (Country exit points)
+- <cite>city_name.notna()</cite> → Red (City center nodes)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame</strong> (<em>nx.MultiDiGraph</em>) – The road network graph.</p></li>
+<li><p><strong>zoom_out_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Scaling factor to adjust the map extent by zooming out (default: <cite>1.1</cite>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Displays a styled transport frame plot with a basemap and legend.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame.weigh_roads">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">weigh_roads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restricted_terr_gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#weigh_roads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame.weigh_roads" title="Permalink to this definition"></a></dt>
+<dd><p>Assigns and normalizes weights for roads in the network based on their proximity to exits.</p>
+<p>The function calculates road segment (edge) weights by evaluating their connections to
+exit points and the type of regions they traverse. If provided, restricted territories
+influence weight assignment. The function then normalizes weights for further analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame</strong> (<em>nx.MultiDiGraph</em>) – The road network graph where nodes represent intersections or exits,
+and edges represent road segments.</p></li>
+<li><p><strong>restricted_terr_gdf</strong> (<em>gpd.GeoDataFrame</em><em>, </em><em>optional</em>) – GeoDataFrame containing restricted territories that may influence
+road weight calculations (default: <cite>None</cite>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated road network graph with assigned and normalized road segment weights.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.MultiDiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame._mark_ref_type">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">_mark_ref_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">geopandas.geodataframe.GeoDataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">geopandas.geodataframe.GeoDataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">networkx.classes.multidigraph.MultiDiGraph</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#_mark_ref_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame._mark_ref_type" title="Permalink to this definition"></a></dt>
+<dd><p>Assign reference types to nodes in the road network based on proximity to reference edges.</p>
+<p>This function identifies nodes marked as exits and assigns reference values and types
+based on the closest reference edge. The assigned values help categorize roads
+according to their significance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of road network nodes, including exit nodes to be marked with reference types.</p></li>
+<li><p><strong>e</strong> (<em>gpd.GeoDataFrame</em>) – GeoDataFrame of road network edges containing reference attributes used for classification.</p></li>
+<li><p><strong>frame</strong> (<em>nx.MultiDiGraph</em>) – The road network graph where nodes represent intersections or exits.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Updated GeoDataFrame of nodes with assigned reference values and types.</p></li>
+<li><p>The original GeoDataFrame of edges.</p></li>
+<li><p>The updated road network graph with relabeled nodes.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[gpd.GeoDataFrame, gpd.GeoDataFrame, nx.MultiDiGraph]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame._determine_ref_type">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">_determine_ref_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#_determine_ref_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame._determine_ref_type" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a reference string into a numeric classification.</p>
+<p>This function categorizes road references based on predefined patterns,
+assigning a numeric value that represents the road type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ref</strong> (<em>str</em>) – A road reference string that follows a standard naming convention.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numeric code corresponding to the identified reference type. If no match is found,
+a default classification (2.3) is assigned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame._get_weight">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">_get_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#_get_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame._get_weight" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the weight for a road segment based on reference types and exit status.</p>
+<p>This function determines the weight of a road connection by considering the reference types
+of the start and end nodes, as well as whether the segment represents an exit. Different
+weight matrices are used for exit and non-exit scenarios.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>float</em>) – The reference type classification of the start node.</p></li>
+<li><p><strong>end</strong> (<em>float</em>) – The reference type classification of the end node.</p></li>
+<li><p><strong>exit</strong> (<em>bool</em>) – Indicates whether the segment represents an exit (True if exit, False otherwise).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The weight value derived from the corresponding weight matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="transport_frames.frame.plot_weighted_roads">
+<span class="sig-prename descclassname"><span class="pre">transport_frames.frame.</span></span><span class="sig-name descname"><span class="pre">plot_weighted_roads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weighted_graph</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MultiDiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_out_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/transport_frames/frame.html#plot_weighted_roads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#transport_frames.frame.plot_weighted_roads" title="Permalink to this definition"></a></dt>
+<dd><p>Visualize a weighted road network on a map.</p>
+<p>This function plots a road network where the thickness of edges corresponds to their
+assigned weights. The visualization includes a basemap for spatial context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>weighted_graph</strong> (<em>nx.MultiDiGraph</em>) – The road network graph where edges contain weight attributes.</p></li>
+<li><p><strong>scaling_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – Factor to scale line thickness based on edge weight (default: 10).</p></li>
+<li><p><strong>zoom_out_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Factor to slightly expand the map view beyond the network boundaries (default: 1.1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Displays the road network plot with weighted edges.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="transport_frames.graph.html" class="btn btn-neutral float-left" title="transport_frames.graph" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="transport_frames.criteria.html" class="btn btn-neutral float-right" title="transport_frames.criteria" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

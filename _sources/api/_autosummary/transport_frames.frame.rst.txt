@@ -1,0 +1,41 @@
+﻿transport\_frames.frame
+=======================
+
+.. automodule:: transport_frames.frame
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_region_attr
+      get_frame
+      mark_exits
+      plot_frame
+      plot_weighted_roads
+      weigh_roads
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CentersSchema
+      PointSchema
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indicators calculation &mdash; transport_frames 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Territory grade and criteria" href="3_criteria.html" />
+    <link rel="prev" title="Graph creation" href="1_graph_frame_creation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            transport_frames
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../transport_frames/index.html">Transport_frames</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="1_graph_frame_creation.html">Graph creation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Indicators calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Initialization">Initialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Area-indicators">Area indicators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Territory-indicators">Territory indicators</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="3_criteria.html">Territory grade and criteria</a></li>
+<li class="toctree-l2"><a class="reference internal" href="4_road_adder.html">Adding roads to the graph</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">transport_frames</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Indicators calculation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/2_indicators.nblink.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Indicators-calculation">
+<h1>Indicators calculation<a class="headerlink" href="#Indicators-calculation" title="Permalink to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import geopandas as gpd
+from transport_frames.indicators import *
+
+import os
+os.getcwd()
+
+import pickle
+</pre></div>
+</div>
+</div>
+<section id="Initialization">
+<h2>Initialization<a class="headerlink" href="#Initialization" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>local_crs = 32637 # Tula region crs
+</pre></div>
+</div>
+</div>
+<p>The region road network graph can be obtained via <code class="docutils literal notranslate"><span class="pre">transport_frames.graph.get_graph()</span></code></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with open(&quot;data/G_drive.pickle&quot;, &quot;rb&quot;) as f:
+    G_drive = pickle.load(f)
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Area-indicators">
+<h2>Area indicators<a class="headerlink" href="#Area-indicators" title="Permalink to this heading"></a></h2>
+<p>Requires the <code class="docutils literal notranslate"><span class="pre">settlement_points</span></code> - points of interest to calculate distances from.</p>
+<p><code class="docutils literal notranslate"><span class="pre">distrcits_polygons</span></code> - the polygons for data aggregation on different levels. Can be used for regional, district and settlement levels.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>districts_polygons = gpd.read_file(&quot;data/tula_region_districts.geojson&quot;)
+settlement_points = gpd.read_file(&quot;data/tula_region_towns.geojson&quot;)
+</pre></div>
+</div>
+</div>
+<p>Distance (in km) to administrative center of the region.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>region_admin_center =ox.geocode_to_gdf(&quot;N34389350&quot;,by_osmid=True) # get head town of Tula region by osmid
+
+get_distance_to_region_admin_center(region_admin_center,settlement_points,districts_polygons,G_drive).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-04 23:07:28.476 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>distance_to_admin_center</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>116.5165</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>130.6290</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>81.9230</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>65.4200</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>110.3645</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Distance (in km) to federal roads.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_distance_to_federal_roads(settlement_points,districts_polygons,G_drive).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-04 23:07:30.560 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>distance_to_federal_roads</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>38.1005</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>87.5390</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>21.7050</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>6.6210</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>15.7180</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Length of the roads in km for every district.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_road_length(G_drive, districts_polygons).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>road_length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>785.737024</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>1214.120013</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>1078.153011</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>1752.549471</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>1062.859612</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Density of the roads <span class="math notranslate nohighlight">\(\mathrm{km/km^2}\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_road_density(G_drive,districts_polygons).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>density</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>0.735164</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>1.022344</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>1.124087</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>1.077431</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>0.989979</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Length of roads for each reg status (1 - federal, 2 - regional, 3 - local).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_reg_length(G_drive,districts_polygons).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>length_reg_1</th>
+      <th>length_reg_2</th>
+      <th>length_reg_3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>0.000000</td>
+      <td>82.519950</td>
+      <td>703.217074</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>0.000000</td>
+      <td>170.932641</td>
+      <td>1043.187372</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>28.650916</td>
+      <td>183.168970</td>
+      <td>866.333125</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>148.987997</td>
+      <td>129.857315</td>
+      <td>1473.704159</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>56.833476</td>
+      <td>40.031030</td>
+      <td>965.995106</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Connectivity of territories in minutes (median accessibility) based on road network graph.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>drive_connectivity = get_connectivity(settlement_points=settlement_points,
+                       area_polygons=districts_polygons,
+                       local_crs=local_crs,
+                       graph=G_drive)
+drive_connectivity.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-04 23:07:37.203 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>connectivity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>137.141621</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>158.219155</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>102.153146</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>104.694100</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>111.845791</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import pandas as pd
+import matplotlib.pyplot as plt
+
+
+fig, ax = plt.subplots(figsize=(10, 8))
+drive_connectivity.plot(
+    column=&quot;connectivity&quot;,
+    cmap=&quot;RdYlGn_r&quot;,
+    legend=True,
+    linewidth=0.2,
+    edgecolor=&quot;white&quot;,
+    ax=ax,
+)
+
+ax.set_axis_off()
+ax.set_title(&quot;Drive connectivity in minutes&quot;)
+plt.tight_layout()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_2_indicators_21_0.png" src="../_images/examples_2_indicators_21_0.png" />
+</div>
+</div>
+<p>Connectivity of territories in minutes based on intermodal network graph (public transport + walk paths).</p>
+<p>Intermodal transport graph can be obtained using <code class="docutils literal notranslate"><span class="pre">transport_frames.graph.get_intermodal_graph</span></code></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>with open(&quot;data/G_inter.pickle&quot;, &quot;rb&quot;) as f:
+    G_pt = pickle.load(f)
+
+intermodal_connectivity = get_connectivity(settlement_points=settlement_points,
+                       area_polygons=districts_polygons,
+                       local_crs=local_crs,
+                       graph=G_pt)
+intermodal_connectivity.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>connectivity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>1379.251669</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>1604.354486</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>907.622067</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>1105.028943</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>1103.344816</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, ax = plt.subplots(figsize=(10, 8))
+intermodal_connectivity.plot(
+    column=&quot;connectivity&quot;,
+    cmap=&quot;RdYlGn_r&quot;,
+    legend=True,
+    linewidth=0.2,
+    edgecolor=&quot;white&quot;,
+    ax=ax,
+)
+
+ax.set_axis_off()
+ax.set_title(&quot;Intermodal connectivity in minutes&quot;)
+plt.tight_layout()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_2_indicators_24_0.png" src="../_images/examples_2_indicators_24_0.png" />
+</div>
+</div>
+<p>Number of the services inside each area polygon. Example: fuel stations across region. You can pass a GeoDataFrame with any type of service (geometry type is Point).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fuel_stations = gpd.read_file(&quot;data/tula_region_fuel_stations.geojson&quot;)
+
+get_service_count(districts_polygons,service=fuel_stations).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>service_number</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>26</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>6</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Accessibility (in minutes) of the services inside each area polygon. If the service is found inside the area, the accessibility equals to zero. Based on shortest path in the graph.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>service_accessibility = get_service_accessibility(settlement_points, G_drive, districts_polygons,
+                            service=fuel_stations)
+service_accessibility.head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-04 23:09:35.297 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>service_accessibility</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>144.500</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>164.750</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>76.625</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>70.250</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>96.625</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>fig, ax = plt.subplots(figsize=(10, 8))
+service_accessibility.plot(
+    column=&quot;service_accessibility&quot;,
+    cmap=&quot;RdYlGn_r&quot;,
+    legend=True,
+    linewidth=0.2,
+    edgecolor=&quot;white&quot;,
+    ax=ax,
+)
+
+ax.set_axis_off()
+ax.set_title(&quot;Fuel station accessibility in minutes&quot;)
+plt.tight_layout()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_2_indicators_29_0.png" src="../_images/examples_2_indicators_29_0.png" />
+</div>
+</div>
+<p>Number of bus routes intersecting the polygons.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_bus_routes_num(districts_polygons, public_transport_graph = G_pt).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/sashamorozov/Documents/Code/tf_dpo/tf/transport_frames/indicators.py:439: UserWarning: Approach is not set. Defaulting to &#39;primal&#39;.
+  n, e = momepy.nx_to_gdf(public_transport_graph)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>bus_routes_count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Арсеньевский район</td>
+      <td>POLYGON ((36.27046 53.67571, 36.27343 53.67505...</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Белевский район</td>
+      <td>POLYGON ((35.89856 53.85018, 35.90015 53.84679...</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Богородицкий район</td>
+      <td>POLYGON ((37.8624 53.73471, 37.86404 53.72565,...</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Воловский район</td>
+      <td>POLYGON ((37.73668 53.45977, 37.74516 53.45518...</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+<section id="Territory-indicators">
+<h2>Territory indicators<a class="headerlink" href="#Territory-indicators" title="Permalink to this heading"></a></h2>
+<p>Indicators aggregated for one territory.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>territory = districts_polygons.iloc[[3]]
+territory.plot()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Axes: &gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_2_indicators_34_1.png" src="../_images/examples_2_indicators_34_1.png" />
+</div>
+</div>
+<p>Number of the services inside territory polygon.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_terr_service_count(territory,
+                            service=fuel_stations,
+                            local_crs=local_crs).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>service_number</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.8212 54.32909, 37.82119 54.3291, ...</td>
+      <td>26</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Accessibility (min) of the services inside territory polygon. If the service is found inside the area, the accessibility equals to zero.</p>
+<p>Based on shortest path in the graph</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_terr_service_accessibility(graph=G_drive,
+                                     territory_polygon=territory,
+                                     service=fuel_stations)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-04 23:09:40.814 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+/Users/sashamorozov/Documents/Code/tf_dpo/tf/.venv/lib/python3.11/site-packages/pandas/io/formats/format.py:1458: RuntimeWarning: overflow encountered in cast
+  has_large_values = (abs_vals &gt; 1e6).any()
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>service_accessibility</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.8212 54.32909, 37.82119 54.3291, ...</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Density of the roads inside territory polygon <span class="math notranslate nohighlight">\(\mathrm{km/km^2}\)</span>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_road_density(G_drive, territory)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>density</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>1.077431</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Distance from center of the polygon to the administrative center of the region</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_terr_distance_to_region_admin_center(region_admin_center, territory, G_drive)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-04 23:09:43.142 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>distance_to_admin_center</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.8212 54.32909, 37.82119 54.3291, ...</td>
+      <td>60.798</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Shortest distance (in km) to nearest district and settlement points, which are laying in intersecting districts.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_terr_nearest_centers(territory, G_drive, districts_polygons,
+                               settlement_points,local_crs)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2026-04-04 23:09:44.613 | WARNING  | Removing 197 nodes from 22 smaller strongly connected components. These are subgraphs where nodes are internally reachable but isolated from the rest. Retaining only the largest strongly connected component (31927 nodes).
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>to_nearest_center_km</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>0.968</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Number of bus routes intersecting the territory</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>get_bus_routes_num(territory, public_transport_graph=G_pt).head()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/sashamorozov/Documents/Code/tf_dpo/tf/transport_frames/indicators.py:439: UserWarning: Approach is not set. Defaulting to &#39;primal&#39;.
+  n, e = momepy.nx_to_gdf(public_transport_graph)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>name</th>
+      <th>geometry</th>
+      <th>bus_routes_count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3</th>
+      <td>Веневский район</td>
+      <td>POLYGON ((37.86087 54.34286, 37.86265 54.34249...</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="1_graph_frame_creation.html" class="btn btn-neutral float-left" title="Graph creation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="3_criteria.html" class="btn btn-neutral float-right" title="Territory grade and criteria" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024-2026, IDU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
