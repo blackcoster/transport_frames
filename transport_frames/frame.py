@@ -79,6 +79,9 @@ def get_frame(graph: nx.MultiDiGraph,
     frame = _filter_roads(graph)
     frame = _assign_city_names_to_nodes(admin_centers, frame)
     frame = mark_exits(frame, area_polygon, region_polygons, country_polygon)
+    if frame.number_of_nodes() > 0:
+        largest_component_nodes = max(nx.weakly_connected_components(frame), key=len)
+        frame = frame.subgraph(largest_component_nodes).copy()
 
     return frame
 

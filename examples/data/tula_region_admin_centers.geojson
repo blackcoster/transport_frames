@@ -1,0 +1,33 @@
+{
+"type": "FeatureCollection",
+"name": "tula_region_admin_centers",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "name": "Ефремов", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.116188, 53.141834 ] } },
+{ "type": "Feature", "properties": { "name": "Волово", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.006, 53.5548 ] } },
+{ "type": "Feature", "properties": { "name": "Богородицк", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.126965, 53.773571 ] } },
+{ "type": "Feature", "properties": { "name": "Новомосковск", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.290943, 54.011013 ] } },
+{ "type": "Feature", "properties": { "name": "Киреевск", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.929916, 53.926712 ] } },
+{ "type": "Feature", "properties": { "name": "Донской", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.3183367, 53.965651 ] } },
+{ "type": "Feature", "properties": { "name": "Узловая", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.160255, 53.978512 ] } },
+{ "type": "Feature", "properties": { "name": "Тула", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.61754, 54.1930321 ] } },
+{ "type": "Feature", "properties": { "name": "Венёв", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.2656, 54.3504 ] } },
+{ "type": "Feature", "properties": { "name": "Теплое", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.1989777, 54.2739347 ] } },
+{ "type": "Feature", "properties": { "name": "Кимовск", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.5327, 53.9699 ] } },
+{ "type": "Feature", "properties": { "name": "Куркино", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 38.6571206, 53.4247526 ] } },
+{ "type": "Feature", "properties": { "name": "Архангельское", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.6959452, 53.2586327 ] } },
+{ "type": "Feature", "properties": { "name": "Щёкино", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.5179079, 54.004465 ] } },
+{ "type": "Feature", "properties": { "name": "Плавск", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.2920333, 53.7068732 ] } },
+{ "type": "Feature", "properties": { "name": "Ленинский", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.4636154, 54.2868111 ] } },
+{ "type": "Feature", "properties": { "name": "Ясногорск", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.693329, 54.4792708 ] } },
+{ "type": "Feature", "properties": { "name": "Новогуровский", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.3401784, 54.4681741 ] } },
+{ "type": "Feature", "properties": { "name": "Заокский", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.3989781, 54.7331733 ] } },
+{ "type": "Feature", "properties": { "name": "Чернь", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 36.910103, 53.450928 ] } },
+{ "type": "Feature", "properties": { "name": "Арсеньево", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 36.6620997, 53.7357884 ] } },
+{ "type": "Feature", "properties": { "name": "Дубна", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 36.9591856, 54.1524925 ] } },
+{ "type": "Feature", "properties": { "name": "Суворов", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 36.500027, 54.12236 ] } },
+{ "type": "Feature", "properties": { "name": "Алексин", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 37.0667213, 54.5028103 ] } },
+{ "type": "Feature", "properties": { "name": "Славный", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 36.472999, 53.5476674 ] } },
+{ "type": "Feature", "properties": { "name": "Белёв", "is_admin_centre_district": true }, "geometry": { "type": "Point", "coordinates": [ 36.137001, 53.811798 ] } }
+]
+}

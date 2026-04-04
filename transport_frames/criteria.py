@@ -11,6 +11,7 @@ import pandera as pa
 from pandera.typing import Series
 from shapely.geometry import MultiPolygon, Point, Polygon
 from tqdm import TqdmWarning
+from iduedu import get_adj_matrix_gdf_to_gdf
 
 from transport_frames.utils.helper_funcs import BaseSchema
 
@@ -416,7 +417,7 @@ def assign_grades(
 
 def get_criteria(
     graded_terr: gpd.GeoDataFrame,
-    points: gpd.GeoDataFrame,
+    towns: gpd.GeoDataFrame,
     polygons: gpd.GeoDataFrame,
     drive_graph: nx.MultiDiGraph = None,
     PT_graph: nx.MultiDiGraph = None,
@@ -469,7 +470,7 @@ def get_criteria(
 
     # graded_terr = graded_terr.reset_index(drop=True,inplace=True)
     graded_terr = graded_terr.to_crs(local_crs).copy()
-    points = PointSchema(points).to_crs(local_crs).copy()
+    towns = PointSchema(towns).to_crs(local_crs).copy()
 
     polygons = PolygonSchema(polygons).to_crs(local_crs).copy()
 
@@ -479,8 +480,8 @@ def get_criteria(
         # getting drive mx
         print("Getting drive matrix")
         adj_mx_drive = get_adj_matrix_gdf_to_gdf(
-            settlement_points.to_crs(local_crs),
-            settlement_points.to_crs(local_crs),
+            towns.to_crs(local_crs),
+            towns.to_crs(local_crs),
             drive_graph,
             weight="time_min",
             dtype=np.float64,
@@ -491,15 +492,15 @@ def get_criteria(
         # getting inter mx
         print("Getting PT matrix")
         adj_mx_PT = get_adj_matrix_gdf_to_gdf(
-            settlement_points.to_crs(local_crs),
-            settlement_points.to_crs(local_crs),
+            towns.to_crs(local_crs),
+            towns.to_crs(local_crs),
             PT_graph,
             weight="time_min",
             dtype=np.float64,
         )
 
     # counting drive connectivity
-    p = find_median(points, adj_mx_drive)
+    p = find_median(towns, adj_mx_drive)
     p_agg = p[p["to_service"] < np.finfo(np.float64).max].copy()
     res = (
         gpd.sjoin(p_agg, polygons, how="left", predicate="within")
@@ -514,7 +515,7 @@ def get_criteria(
     result_df = result_df.drop(columns=["index_right"])
 
     # counting inter connectivity
-    p_inter = find_median(points, adj_mx_PT)
+    p_inter = find_median(towns, adj_mx_PT)
     points_inter = p_inter[p_inter["to_service"] < np.finfo(np.float64).max].copy()
 
     res_inter = (
