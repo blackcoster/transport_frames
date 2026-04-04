@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "transport_frames" 
 version = "2.0.6"
 authors = [
-    {name = "Alexander Morozov", email = "alexandermorozzov@gmail.com" },
-    {name = "Polina Krupenina", email = "krupenina.p@mail.ru" }
+    {name = "Alexander Morozov", email = "alexandermorozzov@gmail.com"},
+    {name = "Polina Krupenina", email = "krupenina.p@mail.ru"}
 ] 
 description = "Python library for transport indicator analysis based on travel-time matrices."
 readme = "README.rst"
