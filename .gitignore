@@ -22,7 +22,7 @@ htmlcov/
 examples/cache/
 cache
 bd_data/
-dataa/
+data/
 .DS_Store
 
 # Django stuff

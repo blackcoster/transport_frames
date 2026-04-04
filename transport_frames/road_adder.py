@@ -1,5 +1,6 @@
 """ Module for adding new roads to the graph """
 
+import re
 import warnings
 
 import geopandas as gpd
@@ -16,6 +17,44 @@ from tqdm import TqdmWarning
 
 
 warnings.simplefilter("ignore", TqdmWarning)
+
+_DEFAULT_SPEED_BY_REG = {
+    1: 110 / 3.6,
+    2: 90 / 3.6,
+    3: 60 / 3.6,
+}
+
+
+def _resolve_maxspeed(maxspeed, reg: int) -> float:
+    """
+    Return a positive speed value for edge creation.
+
+    If incoming `maxspeed` is missing or non-numeric, falls back to a default by `reg`.
+    """
+    candidate = None
+
+    if isinstance(maxspeed, (list, tuple, set)):
+        for value in maxspeed:
+            resolved = _resolve_maxspeed(value, reg)
+            if resolved > 0:
+                return resolved
+    elif isinstance(maxspeed, str):
+        matched = re.search(r"\d+(?:\.\d+)?", maxspeed)
+        if matched:
+            candidate = float(matched.group())
+    else:
+        candidate = pd.to_numeric(maxspeed, errors="coerce")
+
+    if candidate is not None and np.isfinite(candidate) and candidate > 0:
+        return float(candidate)
+
+    reg_value = pd.to_numeric(reg, errors="coerce")
+    if reg_value is not None and np.isfinite(reg_value):
+        reg_speed = _DEFAULT_SPEED_BY_REG.get(int(reg_value))
+        if reg_speed is not None:
+            return float(reg_speed)
+
+    return float(_DEFAULT_SPEED_BY_REG[3])
 
 
 def create_nodeID() -> int:
@@ -71,7 +110,13 @@ def find_nearest_road_point(point: Point, roads_gdf: gpd.GeoDataFrame, road_buff
         max_distance=road_buffer,
     )
     if not nearest_roads_all.empty:
-        nearest_roads = roads_gdf.loc[nearest_roads_all["index_right"].to_list()]
+        right_index_col = next((col for col in nearest_roads_all.columns if col.startswith("index_right")), None)
+        if right_index_col is None:
+            raise KeyError(
+                "Could not find right-index column in sjoin_nearest result. "
+                f"Available columns: {list(nearest_roads_all.columns)}"
+            )
+        nearest_roads = roads_gdf.loc[nearest_roads_all[right_index_col].to_list()]
         nearest_point_on_road = nearest_points(point, nearest_roads.geometry)[1].to_list()[0]
         return nearest_roads, nearest_point_on_road
     return None, None
@@ -104,14 +149,15 @@ def make_edge_data(
     Returns:
         gpd.GeoDataFrame: A GeoDataFrame containing the edge data.
     """
+    resolved_speed = _resolve_maxspeed(maxspeed, reg)
     edge_data = {
         "length_meter": edge_geom.length,
         "geometry": edge_geom,
         "type": "car",
-        "time_sec": edge_geom.length / (maxspeed),
-        "time_min": edge_geom.length / (maxspeed * 60),
+        "time_sec": edge_geom.length / resolved_speed,
+        "time_min": edge_geom.length / (resolved_speed * 60),
         "highway": "unclassified",
-        "maxspeed": maxspeed,
+        "maxspeed": resolved_speed,
         "reg": reg,
         "ref": np.nan,
         # 'is_exit': 'RECOUNT',
