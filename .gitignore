@@ -16,6 +16,7 @@ htmlcov/
 .tox/
 .nox/
 .coverage
+.iduedu_cache
 .cache
 .pytest_cache/
 examples/cache/

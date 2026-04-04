@@ -233,15 +233,16 @@ You can contact us:
 
 -  `IDU <https://idu.itmo.ru/en/contacts/contacts.htm>`__ - Institute of
    Design and Urban Studies
--  `Polina Krupenina <https://t.me/ratyear>`__ - project manager
--  `Alexander Morozov <https://t.me/insert_later>`__ - lead software engineer
+-  `Alexander Morozov <https://t.me/insert_later>`__ - project manager, software engineer
+-  `Polina Krupenina <https://t.me/ratyear>`__ - software engineer
+
 
 .. contacts-end
 
 
 .. |Documentation Status| image:: https://github.com/blackcoster/transport_frames/actions/workflows/documentation.yml/badge.svg?branch=main
    :target: https://blackcoster.github.io/transport_frames/
-.. |PythonVersion| image:: https://img.shields.io/badge/python-3.10-blue
+.. |PythonVersion| image:: https://img.shields.io/badge/python-3.11-blue
    :target: https://pypi.org/project/blocksnet/
 .. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black

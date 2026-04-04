@@ -1,7 +1,7 @@
 import pytest
 import osmnx as ox
 import momepy
-from transport_frames.graph import get_graph_from_polygon
+from transport_frames.graph import get_graph
 
 
 @pytest.fixture
@@ -15,8 +15,8 @@ def local_crs():
     return 32637
 
 @pytest.fixture
-def graph(polygon, local_crs):
-    return get_graph_from_polygon(polygon, local_crs)
+def graph(polygon):
+    return get_graph(territory=polygon)
 
 def test_graph_crs(graph, local_crs):
     """Test if the CRS of the resulting graph matches the local CRS"""
