@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transport_frames" 
-version = "2.0.5"
+version = "2.0.6"
 authors = [
     {name = "Alexander Morozov", email = "alexandermorozzov@gmail.com" },
     {name = "Polina Krupenina", email = "krupenina.p@mail.ru" }

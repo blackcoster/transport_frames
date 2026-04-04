@@ -3,8 +3,8 @@ Transport Frames
 
 .. logo-start
 
-.. figure:: https://sun9-46.userapi.com/impf/aUFBStH0x_6jN9UhgwrKN1WN4hZ9Y2HMMrXT2w/NuzVobaGlZ0.jpg?size=1590x400&quality=95&crop=0,0,1878,472&sign=9d33baa41a86de35d951d4bbd8011994&type=cover_group
-   :alt: The Institute of Design and Urban Studies
+.. .. figure:: https://sun9-46.userapi.com/impf/aUFBStH0x_6jN9UhgwrKN1WN4hZ9Y2HMMrXT2w/NuzVobaGlZ0.jpg?size=1590x400&quality=95&crop=0,0,1878,472&sign=9d33baa41a86de35d951d4bbd8011994&type=cover_group
+..    :alt: The Institute of Design and Urban Studies
 
 .. logo-end
 
@@ -31,21 +31,21 @@ Features
 .. features-start
 
 
-🚏 **Frame and Road Network Analysis**
+**Frame and Road Network Analysis**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Constructs **frames** from drive graphs to analyze road connectivity.
 - Investigates **priority roads** based on estimated route popularity.
 - Updates transport graphs by adding new edges and ensuring seamless network connectivity.
 
-🌍 **Territory Grading and Connectivity**
+**Territory Grading and Connectivity**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Grades territories based on **proximity to federal and regional roads**.
 - Computes **connectivity values** from road networks and accessibility to key transport services (bus stops, railways, airports, ports).
 - Assigns **territory-wide scores** to summarize transport accessibility.
 
-📊 **Indicator Computation**
+**Indicator Computation**
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The library calculates various transport indicators at different **administrative levels** (region, district, etc.), including:
@@ -103,22 +103,24 @@ The following **Jupyter Notebooks** illustrate core library functions:
    - Updates transport graphs with new roads and edges.
    - Analyzes connectivity improvement after graph modifications.
 
+
+5. **Transport Provision** → `5_transport_provision.ipynb <examples/5_transport_provision.ipynb>`_
+   - Calculates a transport provision index for each territory polygon.
+   - Combines road and railway density, airport accessibility, and settlement area share into one metric.
 .. use-end
 
 Data
 ----
 
-Before running the examples, one can use the data from `tests
-section <#tests/data>`__
-and place it in the ``examples/data`` directory. You can use your own
+Before running the examples, one can use the data from ``examples/data`` directory. You can use your own
 data, but it must follow the structure described in the
 `API documentation <https://aimclub.github.io/blocksnet/>`__.
 
 Documentation
 -------------
 
-Detailed information and description of BlocksNet is available in
-`documentation <https://blackcoster.github.io/transport_frames/>`__.
+Detailed information and description of Transport Frames is available in
+`documentation <https://alexandermorozzov.github.io/tf/>`__.
 
 Project Structure
 -----------------
@@ -144,46 +146,6 @@ The repository includes the following directories and modules:
 -  `docs <https://github.com/blackcoster/transport_frames/tree/main/docs>`__ -
    documentation sources
 
-Developing
-----------
-
-.. developing-start
-
-To start developing the library, one must perform following actions:
-
-1. Clone the repository:
-   ::
-
-       $ git clone https://github.com/blackcoster/transport_frames
-
-2. (Optional) Create a virtual environment as the library demands exact package versions:
-   ::
-
-       $ make venv
-
-   Activate the virtual environment if you created one:
-   ::
-
-       $ source .venv/bin/activate
-
-3. Install the library in editable mode with development dependencies:
-   ::
-
-       $ make install-dev
-
-4. Install pre-commit hooks:
-   ::
-
-       $ pre-commit install
-
-5. Create a new branch based on ``develop``:
-   ::
-
-       $ git checkout -b develop <new_branch_name>
-
-6. Start making changes on your newly created branch, remembering to
-   never work on the ``main`` branch! Work on this copy on your
-   computer using Git to do the version control.
 
 .. 7. Update
 ..    `tests <https://github.com/blackcoster/transport_frames/tree/main/tests>`__
@@ -240,8 +202,8 @@ You can contact us:
 .. contacts-end
 
 
-.. |Documentation Status| image:: https://github.com/blackcoster/transport_frames/actions/workflows/documentation.yml/badge.svg?branch=main
-   :target: https://blackcoster.github.io/transport_frames/
+.. |Documentation Status| image:: https://github.com/alexandermorozzov/tf/actions/workflows/documentation.yml/badge.svg?branch=main
+   :target: https://alexandermorozzov.github.io/tf/
 .. |PythonVersion| image:: https://img.shields.io/badge/python-3.11-blue
    :target: https://pypi.org/project/blocksnet/
 .. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
