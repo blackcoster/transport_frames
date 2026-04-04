@@ -1,19 +1,20 @@
-[build-system] # информация для сборки проекта в пакет
+[build-system] 
 requires = ["setuptools>=64.0"]
 build-backend = "setuptools.build_meta"
 
-[project] # метаданные проекта
-name = "transport_frames" # название вашего проекта
+[project]
+name = "transport_frames" 
 version = "2.0.5"
 authors = [
-    { name = "Polina Krupenina", email = "krupenina.p@mail.ru" },
+    {name = "Alexander Morozov", email = "alexandermorozzov@gmail.com" },
+    {name = "Polina Krupenina", email = "krupenina.p@mail.ru" }
 ] 
-description = "IDU research package boilerplate"
+description = "Python library for transport indicator analysis based on travel-time matrices."
 readme = "README.rst"
 requires-python = ">=3.10"
 license = { file = "LICENCE" }
 
-dependencies = [ # здесь необходимо вести все устанавливаемые зависимости: пакеты, которые необходимы для адекватной работы вашей библиотеки
+dependencies = [
     "geopandas>=0.12,<0.15",
     "osmnx==1.9.4",
     "networkx>=3.2",
@@ -28,39 +29,39 @@ dependencies = [ # здесь необходимо вести все устан�
     "iduedu==0.2.2"
 ]
 
-classifiers = [ # метаданные для описания проекта пользователям, например, на PyPI: какая лицензия, какое предназначение
+classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
 ]
 
-[tool.setuptools.packages.find] # что включать в сборку при установке
+[tool.setuptools.packages.find]
 include = ["transport_frames*"]
 
 
 [project.optional-dependencies]
-dev = [ # зависимости, необходимые для разработки библиотеки, но не для её использования
-    "black[jupyter]==22.3",     # Форматирование, включая поддержку Jupyter
-    "mapclassify==2.6.1",       # Визуализация данных в Jupyter
-    "folium==0.14.0",           # Карты для Jupyter
-    "matplotlib-inline==0.1.6", # Встроенные графики в Jupyter
-    "ipykernel",                # Ядро для работы в Jupyter
-    "jupyter",                  # Jupyter Notebook
-    "ipywidgets",               # Виджеты для интерактивных элементов
-    "isort==5.10.1",            # Сортировка импортов
-    "pylint==2.17.5",           # Линтинг
-    "pre-commit>=3.1",          # Интеграция хуков для автоформатирования
-    "build",                    # Сборка пакета для публикации
-    "twine",                    # Публикация пакета на PyPI
+dev = [
+    "black[jupyter]==22.3",
+    "mapclassify==2.6.1",     
+    "folium==0.14.0",       
+    "matplotlib-inline==0.1.6",
+    "ipykernel",
+    "jupyter",
+    "ipywidgets",
+    "isort==5.10.1",
+    "pylint==2.17.5",
+    "pre-commit>=3.1",
+    "build",
+    "twine",
 ]
 
-test = [ # зависимости, необходимые для тестирования библиотеки
+test = [
     "pytest>=7.0.0,<8.0.0",
     "pytest-cov>=4.0.0,<5.0.0",
 ]
 
-docs = [ # зависимости, необходимые для сборки документации
+docs = [
     "docutils>=0.18.1,<0.20",
     "sphinx==6.2.1",
     "sphinx-book-theme==1.0.1",
@@ -76,10 +77,9 @@ docs = [ # зависимости, необходимые для сборки д
 
 
 [project.urls]
-"Repository" = "https://github.com/blackcoster/transport_frames"
-"Bug Tracker" = "https://github.com/blackcoster/transport_frames/issues"
+"Repository" = "https://github.com/alexandermorozzov/tf"
+"Bug Tracker" = "https://github.com/alexandermorozzov/tf/issues"
 
-# всякие истории, связанные с форматированием кода
 [tool.black]
 line-length = 120
 target-version = ['py310']
