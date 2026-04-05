@@ -107,6 +107,7 @@ The following **Jupyter Notebooks** illustrate core library functions:
 5. **Transport Provision** → `5_transport_provision.ipynb <examples/5_transport_provision.ipynb>`_
    - Calculates a transport provision index for each territory polygon.
    - Combines road and railway density, airport accessibility, and settlement area share into one metric.
+   
 .. use-end
 
 Data
