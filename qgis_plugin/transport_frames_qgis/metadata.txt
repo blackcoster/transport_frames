@@ -1,0 +1,16 @@
+[general]
+name=Transport Frames
+description=QGIS tools for transport_frames workflows
+about=QGIS Processing provider for transport_frames library
+version=0.1.0
+qgisMinimumVersion=3.28
+author=Alexander Morozov
+email=alexandermorozzov@gmail.com
+license=BSD-3-Clause
+hasProcessingProvider=yes
+category=Analysis
+tags=transport,accessibility,network,graph
+homepage=https://github.com/alexandermorozzov/tf
+repository=https://github.com/alexandermorozzov/tf
+tracker=https://github.com/alexandermorozzov/tf/issues
+experimental=True
