@@ -8,8 +8,8 @@ from qgis.core import (
     QgsProcessingAlgorithm,
     QgsProcessingException,
     QgsProcessingParameterEnum,
+    QgsProcessingParameterFile,
     QgsProcessingParameterFileDestination,
-    QgsProcessingParameterNumber,
     QgsProcessingParameterString,
     QgsProcessingParameterVectorDestination,
     QgsProcessingParameterVectorLayer,
@@ -29,21 +29,20 @@ from ..env_manager import (
 )
 
 
-class GetGraphAlgorithm(QgsProcessingAlgorithm):
-    OSM_ID = "OSM_ID"
-    TERRITORY = "TERRITORY"
+class AddRoadsAlgorithm(QgsProcessingAlgorithm):
+    INPUT_GRAPH = "INPUT_GRAPH"
+    NEW_ROADS = "NEW_ROADS"
     RUN_MODE = "RUN_MODE"
     PYTHON_BIN = "PYTHON_BIN"
     OUTPUT_GRAPH = "OUTPUT_GRAPH"
     OUTPUT_EDGES = "OUTPUT_EDGES"
     OUTPUT_NODES = "OUTPUT_NODES"
-    DEFAULT_BUFFER_METERS = 3000
 
     def name(self):
-        return "get_graph"
+        return "add_roads"
 
     def displayName(self):
-        return "Get Drive Graph"
+        return "Add Roads"
 
     def group(self):
         return "2 - Graph"
@@ -53,16 +52,18 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return (
-            "Build drive graph for territory.\n\n"
-            "You must provide exactly one input:\n"
-            "- OSM relation ID, or\n"
-            "- Territory boundary (required columns: name and geometry (Polygon or MultiPolygon)).\n\n"
+            "Add new road lines to an existing drive graph.\n\n"
+            "Inputs:\n"
+            "- Input drive graph obtained via Get Drive Graph method (.pkl)\n"
+            "- New roads geolayer (required columns: geometry (LineString or MultiLineString), reg)\n\n"
+            "Notes:\n"
+            "- `reg` should contain road class values (typically 1, 2, 3).\n"
+            "- Local CRS is read automatically from the input graph and applied internally.\n\n"
             "Python mode:\n"
             "- Managed (recommended): uses plugin-managed environment in QGIS profile.\n"
             "- Custom: uses provided Python path.\n\n"
-
             "Outputs:\n"
-            "- graph.pkl\n"
+            "- updated_graph.pkl\n"
             "- edges layer\n"
             "- nodes layer"
         )
@@ -72,19 +73,19 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
         mode_default = 0 if current_mode == MODE_MANAGED else 1
 
         self.addParameter(
-            QgsProcessingParameterNumber(
-                self.OSM_ID,
-                "OSM relation ID",
-                type=QgsProcessingParameterNumber.Integer,
-                optional=True,
+            QgsProcessingParameterFile(
+                self.INPUT_GRAPH,
+                "Input graph file (.pkl)",
+                behavior=QgsProcessingParameterFile.File,
+                fileFilter="Pickle files (*.pkl)",
             )
         )
         self.addParameter(
             QgsProcessingParameterVectorLayer(
-                self.TERRITORY,
-                "Territory boundary (required columns: name and geometry (Polygon or MultiPolygon))",
-                types=[QgsProcessing.TypeVectorPolygon],
-                optional=True,
+                self.NEW_ROADS,
+                "New roads geolayer (required columns: geometry and reg)",
+                types=[QgsProcessing.TypeVectorLine],
+                optional=False,
             )
         )
         self.addParameter(
@@ -110,21 +111,21 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.OUTPUT_GRAPH,
-                "Output graph file (.pkl)",
+                "Output updated graph file (.pkl)",
                 fileFilter="Pickle files (*.pkl)",
             )
         )
         self.addParameter(
             QgsProcessingParameterVectorDestination(
                 self.OUTPUT_EDGES,
-                "Output graph edges",
+                "Output updated graph edges",
                 type=QgsProcessing.TypeVectorLine,
             )
         )
         self.addParameter(
             QgsProcessingParameterVectorDestination(
                 self.OUTPUT_NODES,
-                "Output graph nodes",
+                "Output updated graph nodes",
                 type=QgsProcessing.TypeVectorPoint,
             )
         )
@@ -156,20 +157,15 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
                 raise QgsProcessingException(str(exc)) from exc
             set_custom_python_path(python_input)
 
-        osm_id_raw = self.parameterAsString(parameters, self.OSM_ID, context).strip()
-        if osm_id_raw in {"", "None", "NULL"}:
-            osm_id = None
-        else:
-            osm_id = int(osm_id_raw)
+        graph_path = self.parameterAsFile(parameters, self.INPUT_GRAPH, context)
+        if not graph_path or not os.path.exists(graph_path):
+            raise QgsProcessingException(f"Input graph file not found: {graph_path}")
 
-        territory_layer = self.parameterAsVectorLayer(parameters, self.TERRITORY, context)
+        roads_layer = self.parameterAsVectorLayer(parameters, self.NEW_ROADS, context)
+        if roads_layer is None:
+            raise QgsProcessingException("New roads layer is required.")
 
-        if (osm_id is None and territory_layer is None) or (osm_id is not None and territory_layer is not None):
-            raise QgsProcessingException(
-                "Provide exactly one input: either OSM relation ID or Territory boundary layer."
-            )
-
-        graph_path = self.parameterAsFileOutput(parameters, self.OUTPUT_GRAPH, context)
+        output_graph_path = self.parameterAsFileOutput(parameters, self.OUTPUT_GRAPH, context)
         edges_uri = self.parameterAsOutputLayer(parameters, self.OUTPUT_EDGES, context)
         if not edges_uri or edges_uri.startswith("memory:"):
             raise QgsProcessingException("Please choose file-based output for graph edges (e.g., GeoPackage).")
@@ -182,20 +178,34 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
         script_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "bridge",
-            "get_graph_bridge.py",
+            "add_roads_bridge.py",
         )
         if not os.path.exists(script_path):
             raise QgsProcessingException(f"Bridge script not found: {script_path}")
 
-        tmp_territory = None
+        tmp_roads = None
         try:
+            tmp_roads = tempfile.NamedTemporaryFile(suffix=".gpkg", delete=False).name
+            processing.run(
+                "native:savefeatures",
+                {
+                    "INPUT": roads_layer,
+                    "OUTPUT": tmp_roads,
+                },
+                context=context,
+                feedback=feedback,
+                is_child_algorithm=True,
+            )
+
             cmd = [
                 python_bin,
                 script_path,
-                "--buffer",
-                str(self.DEFAULT_BUFFER_METERS),
-                "--graph-out",
+                "--input-graph",
                 graph_path,
+                "--new-roads-path",
+                tmp_roads,
+                "--graph-out",
+                output_graph_path,
                 "--edges-out",
                 edges_path,
                 "--nodes-out",
@@ -205,22 +215,6 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
                 cmd.extend(["--edges-layer", edges_layer])
             if nodes_layer:
                 cmd.extend(["--nodes-layer", nodes_layer])
-
-            if osm_id is not None:
-                cmd.extend(["--osm-id", str(osm_id)])
-            else:
-                tmp_territory = tempfile.NamedTemporaryFile(suffix=".gpkg", delete=False).name
-                processing.run(
-                    "native:savefeatures",
-                    {
-                        "INPUT": territory_layer,
-                        "OUTPUT": tmp_territory,
-                    },
-                    context=context,
-                    feedback=feedback,
-                    is_child_algorithm=True,
-                )
-                cmd.extend(["--territory-path", tmp_territory])
 
             feedback.pushInfo(f"Running external Python: {python_bin}")
             proc = subprocess.run(cmd, text=True, capture_output=True, env=build_subprocess_env(python_bin))
@@ -235,19 +229,19 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
                 )
 
             return {
-                self.OUTPUT_GRAPH: graph_path,
+                self.OUTPUT_GRAPH: output_graph_path,
                 self.OUTPUT_EDGES: edges_uri,
                 self.OUTPUT_NODES: nodes_uri,
             }
         finally:
-            if tmp_territory and os.path.exists(tmp_territory):
+            if tmp_roads and os.path.exists(tmp_roads):
                 try:
-                    os.remove(tmp_territory)
+                    os.remove(tmp_roads)
                 except OSError:
                     pass
 
     def createInstance(self):
-        return GetGraphAlgorithm()
+        return AddRoadsAlgorithm()
 
     @staticmethod
     def _parse_output_uri(uri: str):

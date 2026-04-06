@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""External bridge script for QGIS -> transport_frames get_graph."""
+"""External bridge script for QGIS -> transport_frames get_intermodal_graph."""
 
 import argparse
 import os
@@ -24,21 +24,20 @@ def _normalize_value(value):
     return value
 
 
-def _prepare_edges_for_export(edges_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    edges = edges_gdf.copy()
-    for col in edges.columns:
+def _prepare_attrs_for_export(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    result = gdf.copy()
+    for col in result.columns:
         if col == "geometry":
             continue
-        if edges[col].dtype == "object":
-            edges[col] = edges[col].apply(_normalize_value)
-    return edges
+        if result[col].dtype == "object":
+            result[col] = result[col].apply(_normalize_value)
+    return result
 
 
 def _parse_args():
-    parser = argparse.ArgumentParser(description="Build drive graph via transport_frames.")
+    parser = argparse.ArgumentParser(description="Build intermodal graph via transport_frames.")
     parser.add_argument("--osm-id", type=int, default=None)
     parser.add_argument("--territory-path", type=str, default=None)
-    parser.add_argument("--buffer", type=int, default=3000)
     parser.add_argument("--graph-out", type=str, required=True)
     parser.add_argument("--edges-out", type=str, required=True)
     parser.add_argument("--nodes-out", type=str, required=True)
@@ -48,29 +47,15 @@ def _parse_args():
 
 
 def _configure_runtime_environment() -> str:
-    """
-    Configure writable runtime/cache paths for external execution from QGIS.
-    """
     runtime_root = os.path.join(tempfile.gettempdir(), "transport_frames_qgis_runtime")
     os.makedirs(runtime_root, exist_ok=True)
 
-    osmnx_cache = os.path.join(runtime_root, "osmnx_cache")
     iduedu_cache = os.path.join(runtime_root, "iduedu_cache")
-    os.makedirs(osmnx_cache, exist_ok=True)
     os.makedirs(iduedu_cache, exist_ok=True)
 
-    # Keep all relative cache paths away from potential read-only cwd (e.g., "/").
     os.chdir(runtime_root)
-
-    # iduedu reads these env vars in config.
     os.environ["OVERPASS_CACHE_DIR"] = iduedu_cache
     os.environ["OVERPASS_CACHE_ENABLED"] = "1"
-
-    # osmnx uses settings.cache_folder (default "./cache"), set explicit writable path.
-    import osmnx as ox
-
-    ox.settings.cache_folder = osmnx_cache
-    ox.settings.use_cache = True
     return runtime_root
 
 
@@ -82,7 +67,7 @@ def main():
     if (args.osm_id is None) == (args.territory_path is None):
         raise ValueError("Provide exactly one of --osm-id or --territory-path.")
 
-    get_graph = import_transport_frames("transport_frames.graph", "get_graph")
+    get_intermodal_graph = import_transport_frames("transport_frames.graph", "get_intermodal_graph")
 
     territory = None
     if args.territory_path is not None:
@@ -91,9 +76,9 @@ def main():
             raise ValueError("Territory layer is empty.")
 
     if args.osm_id is not None:
-        graph = get_graph(osm_id=args.osm_id, buffer=args.buffer)
+        graph = get_intermodal_graph(osm_id=args.osm_id)
     else:
-        graph = get_graph(territory=territory, buffer=args.buffer)
+        graph = get_intermodal_graph(territory=territory)
 
     graph_dir = os.path.dirname(args.graph_out)
     if graph_dir:
@@ -102,8 +87,8 @@ def main():
         pickle.dump(graph, f)
 
     nodes, edges = momepy.nx_to_gdf(graph)
-    nodes = _prepare_edges_for_export(nodes)
-    edges = _prepare_edges_for_export(edges)
+    nodes = _prepare_attrs_for_export(nodes)
+    edges = _prepare_attrs_for_export(edges)
 
     nodes_dir = os.path.dirname(args.nodes_out)
     if nodes_dir:

@@ -29,7 +29,7 @@ from ..env_manager import (
 )
 
 
-class GetGraphAlgorithm(QgsProcessingAlgorithm):
+class GetIntermodalGraphAlgorithm(QgsProcessingAlgorithm):
     OSM_ID = "OSM_ID"
     TERRITORY = "TERRITORY"
     RUN_MODE = "RUN_MODE"
@@ -37,13 +37,12 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
     OUTPUT_GRAPH = "OUTPUT_GRAPH"
     OUTPUT_EDGES = "OUTPUT_EDGES"
     OUTPUT_NODES = "OUTPUT_NODES"
-    DEFAULT_BUFFER_METERS = 3000
 
     def name(self):
-        return "get_graph"
+        return "get_intermodal_graph"
 
     def displayName(self):
-        return "Get Drive Graph"
+        return "Get Intermodal Graph"
 
     def group(self):
         return "2 - Graph"
@@ -53,14 +52,13 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return (
-            "Build drive graph for territory.\n\n"
+            "Build intermodal graph (public transport routes and walk paths) for territory.\n\n"
             "You must provide exactly one input:\n"
             "- OSM relation ID, or\n"
             "- Territory boundary (required columns: name and geometry (Polygon or MultiPolygon)).\n\n"
             "Python mode:\n"
             "- Managed (recommended): uses plugin-managed environment in QGIS profile.\n"
             "- Custom: uses provided Python path.\n\n"
-
             "Outputs:\n"
             "- graph.pkl\n"
             "- edges layer\n"
@@ -110,21 +108,21 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.OUTPUT_GRAPH,
-                "Output graph file (.pkl)",
+                "Output intermodal graph file (.pkl)",
                 fileFilter="Pickle files (*.pkl)",
             )
         )
         self.addParameter(
             QgsProcessingParameterVectorDestination(
                 self.OUTPUT_EDGES,
-                "Output graph edges",
+                "Output intermodal graph edges",
                 type=QgsProcessing.TypeVectorLine,
             )
         )
         self.addParameter(
             QgsProcessingParameterVectorDestination(
                 self.OUTPUT_NODES,
-                "Output graph nodes",
+                "Output intermodal graph nodes",
                 type=QgsProcessing.TypeVectorPoint,
             )
         )
@@ -182,7 +180,7 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
         script_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "bridge",
-            "get_graph_bridge.py",
+            "get_intermodal_graph_bridge.py",
         )
         if not os.path.exists(script_path):
             raise QgsProcessingException(f"Bridge script not found: {script_path}")
@@ -192,8 +190,6 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
             cmd = [
                 python_bin,
                 script_path,
-                "--buffer",
-                str(self.DEFAULT_BUFFER_METERS),
                 "--graph-out",
                 graph_path,
                 "--edges-out",
@@ -247,7 +243,7 @@ class GetGraphAlgorithm(QgsProcessingAlgorithm):
                     pass
 
     def createInstance(self):
-        return GetGraphAlgorithm()
+        return GetIntermodalGraphAlgorithm()
 
     @staticmethod
     def _parse_output_uri(uri: str):
